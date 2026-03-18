@@ -105,13 +105,11 @@ module cheshire_soc import cheshire_pkg::*; #(
   output logic [UsbNumPorts-1:0] usb_dm_oe_o,
   input  logic [UsbNumPorts-1:0] usb_dp_i,
   output logic [UsbNumPorts-1:0] usb_dp_o,
-  output logic [UsbNumPorts-1:0] usb_dp_oe_o,
   // ATG pulse signals
   input ext_start,
   input ext_stop
 );
 
-  `include "apb/typedef.svh"
   `include "axi/typedef.svh"
   `include "common_cells/registers.svh"
   `include "common_cells/assertions.svh"
@@ -244,7 +242,10 @@ module cheshire_soc import cheshire_pkg::*; #(
     UniqueIds:          0,
     AxiAddrWidth:       Cfg.AddrWidth,
     AxiDataWidth:       Cfg.AxiDataWidth,
-    NoAddrRules:        AxiOut.num_rules
+    NoAddrRules:        AxiOut.num_rules,
+    // Setting a `default` here allows for custom XBars with extended configs outside Cheshire.
+    // Importantly, this requires that '0 *disables* any and all such custom extensions.
+    default: '0
   };
 
   axi_xbar #(
@@ -1846,55 +1847,6 @@ module cheshire_soc import cheshire_pkg::*; #(
     assign usb_dp_oe_o = '0;
 
     assign intr.intn.usb = 0;
-
-  end
-
-  /////////////////
-  //  APB Timer  //
-  /////////////////
-
-  `APB_TYPEDEF_REQ_T(timer_apb_req_t, logic [Cfg.AddrWidth-1:0], logic [31:0], logic [3:0])
-  `APB_TYPEDEF_RESP_T(timer_apb_rsp_t, logic [31:0])
-
-  if (Cfg.ApbTimer) begin : gen_apb_timer
-
-    timer_apb_req_t timer_apb_req;
-    timer_apb_rsp_t timer_apb_rsp;
-
-    reg_to_apb #(
-      .reg_req_t  ( reg_req_t       ),
-      .reg_rsp_t  ( reg_rsp_t       ),
-      .apb_req_t  ( timer_apb_req_t ),
-      .apb_rsp_t  ( timer_apb_rsp_t )
-    ) i_reg_to_apb_timer (
-      .clk_i,
-      .rst_ni,
-      .reg_req_i  ( reg_out_req[RegOut.apb_timer] ),
-      .reg_rsp_o  ( reg_out_rsp[RegOut.apb_timer] ),
-      .apb_req_o  ( timer_apb_req                 ),
-      .apb_rsp_i  ( timer_apb_rsp                 )
-    );
-
-    apb_timer #(
-      .APB_ADDR_WIDTH ( Cfg.AddrWidth ),
-      .TIMER_CNT      ( 2             ) // Number of timers instantiated
-    ) i_apb_timer (
-      .HCLK    ( clk_i                 ),
-      .HRESETn ( rst_ni                ),
-      .PSEL    ( timer_apb_req.psel    ),
-      .PENABLE ( timer_apb_req.penable ),
-      .PWRITE  ( timer_apb_req.pwrite  ),
-      .PADDR   ( timer_apb_req.paddr   ),
-      .PWDATA  ( timer_apb_req.pwdata  ),
-      .PRDATA  ( timer_apb_rsp.prdata  ),
-      .PREADY  ( timer_apb_rsp.pready  ),
-      .PSLVERR ( timer_apb_rsp.pslverr ),
-      .irq_o   ( intr.intn.apb_timer   )
-    );
-
-  end else begin : gen_no_apb_timer
-
-    assign intr.intn.apb_timer = '0;
 
   end
 

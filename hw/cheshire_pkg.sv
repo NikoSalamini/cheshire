@@ -160,7 +160,6 @@ package cheshire_pkg;
     bit     AxiRt;
     bit     Clic;
     bit     IrqRouter;
-    bit     ApbTimer;
     bit     BusErr;
     bit     Atg;
     // Parameters for Debug Module
@@ -275,7 +274,6 @@ package cheshire_pkg;
     logic i2c_fmt_overflow;
     logic i2c_rx_threshold;
     logic i2c_fmt_threshold;
-    logic [3:0] apb_timer;
     logic uart;
     logic zero;
   } cheshire_int_intr_t;
@@ -313,18 +311,16 @@ package cheshire_pkg;
   endfunction
 
   // Static addresses (defined here only if multiply used)
-  localparam doub_bt AmDbg      = 'h0000_0000;  // Base of AXI peripherals
-  localparam doub_bt AmBrom     = 'h0200_0000;  // Base of reg peripherals
-  localparam doub_bt AmRegs     = 'h0300_0000;
-  localparam doub_bt AmLlc      = 'h0300_1000;
-  localparam doub_bt AmSlink    = 'h0300_6000;
-  localparam doub_bt AmBusErr   = 'h0300_9000;
-  localparam doub_bt AmTagger   = 'h0300_A000;
-  localparam doub_bt AmSpm      = 'h1000_0000;  // Cached region at bottom, uncached on top
-  localparam doub_bt AmSpmUnc   = 'h1400_0000;
-  localparam doub_bt AmClic     = 'h0800_0000;
-  localparam doub_bt AmPlic     = 'h0c00_0000;
-  localparam doub_bt AmApbTimer = 'h0400_0000;
+  localparam doub_bt AmDbg    = 'h0000_0000;  // Base of AXI peripherals
+  localparam doub_bt AmBrom   = 'h0200_0000;  // Base of reg peripherals
+  localparam doub_bt AmRegs   = 'h0300_0000;
+  localparam doub_bt AmLlc    = 'h0300_1000;
+  localparam doub_bt AmSlink  = 'h0300_6000;
+  localparam doub_bt AmBusErr = 'h0300_9000;
+  localparam doub_bt AmTagger = 'h0300_A000;
+  localparam doub_bt AmSpm    = 'h1000_0000;  // Cached region at bottom, uncached on top
+  localparam doub_bt AmSpmUnc = 'h1400_0000;
+  localparam doub_bt AmClic   = 'h0800_0000;
 
   // Static masks
   localparam doub_bt AmSpmRegionMask = 'h03FF_FFFF;
@@ -442,7 +438,6 @@ package cheshire_pkg;
     aw_bt usb;
     aw_bt axirt;
     aw_bt irq_router;
-    aw_bt apb_timer;
     aw_bt [2**MaxCoresWidth-1:0] bus_err;
     aw_bt [2**MaxCoresWidth-1:0] clic;
     aw_bt tagger;
@@ -456,7 +451,7 @@ package cheshire_pkg;
     reg_out_t ret = '{err: 0, clint: 1, plic: 2, regs: 3, default: '0};
     int unsigned i = 3, r = 2;
     ret.map[0] = '{1, 'h0204_0000, 'h0208_0000};
-    ret.map[1] = '{2, AmPlic, AmPlic + 'h0400_0000};
+    ret.map[1] = '{2, 'h0400_0000, 'h0800_0000};
     ret.map[2] = '{3, AmRegs,  AmRegs + 'h1000};
     if (cfg.Bootrom)      begin i++; ret.bootrom    = i; r++; ret.map[r] = '{i, AmBrom, AmBrom + 'h40000}; end
     if (cfg.LlcNotBypass) begin i++; ret.llc        = i; r++; ret.map[r] = '{i, AmLlc,    AmLlc + 'h1000}; end
@@ -469,7 +464,6 @@ package cheshire_pkg;
     if (cfg.Usb)          begin i++; ret.usb        = i; r++; ret.map[r] = '{i, 'h0300_8000, 'h0300_9000}; end
     if (cfg.IrqRouter)    begin i++; ret.irq_router = i; r++; ret.map[r] = '{i, 'h0208_0000, 'h020c_0000}; end
     if (cfg.AxiRt)        begin i++; ret.axirt      = i; r++; ret.map[r] = '{i, 'h020c_0000, 'h0210_0000}; end
-    if (cfg.ApbTimer)     begin i++; ret.apb_timer  = i; r++; ret.map[r] = '{i, AmApbTimer, AmApbTimer + 'h40}; end
     if (cfg.Clic) for (int j = 0; j < cfg.NumCores; j++) begin
       i++; ret.clic[j]    = i; r++; ret.map[r] = '{i, AmClic + j*'h40000, AmClic + (j+1)*'h40000};
     end
@@ -678,7 +672,6 @@ package cheshire_pkg;
     AxiRt             : 0,
     Clic              : 0,
     IrqRouter         : 0,
-    ApbTimer          : 0,
     BusErr            : 1,
     Atg               : 1,
     // Debug
