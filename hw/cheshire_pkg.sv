@@ -744,7 +744,7 @@ package cheshire_pkg;
     ClicPrioWidth     : 1,
     // ATG
     /* TODO: none for now */
-    AtgPostCut          : 1
+    AtgPostCut          : 1,
     // All non-set values should be zero
     default: '0
   };
