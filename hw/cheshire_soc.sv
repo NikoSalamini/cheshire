@@ -105,7 +105,7 @@ module cheshire_soc import cheshire_pkg::*; #(
   output logic [UsbNumPorts-1:0] usb_dm_oe_o,
   input  logic [UsbNumPorts-1:0] usb_dp_i,
   output logic [UsbNumPorts-1:0] usb_dp_o,
-  output logic [UsbNumPorts-1:0] usb_dp_oe,
+  output logic [UsbNumPorts-1:0] usb_dp_oe_o,
   // ATG pulse signals
   input ext_start,
   input ext_stop,
