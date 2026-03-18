@@ -226,8 +226,9 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
   logic       sys_rst;
 
   // atg vios
-  logic       ext_start,  vio_ext_start;
-  logic       ext_stop,   vio_ext_stop;
+  logic         ext_start,  vio_ext_start;
+  logic         ext_stop,   vio_ext_stop;
+  logic [31:0]  start_address_i, vio_start_address_i; // the address of the platform is 32 bits (TODO: hard-coded)
 
 `ifdef USE_VIO
   vio i_vio (
@@ -236,14 +237,16 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
     .probe_out1 ( vio_boot_mode     ),
     .probe_out2 ( vio_boot_mode_sel ),
     .probe_out3 ( vio_ext_start     ),
-    .probe_out4 ( vio_ext_stop      )
+    .probe_out4 ( vio_ext_stop      ),
+    .probe_out5 ( vio_start_address_i)
   );
 `else
-  assign vio_reset          = '0;
-  assign vio_boot_mode      = '0;
-  assign vio_boot_mode_sel  = '0;
-  assign vio_ext_start      = '0;
-  assign vio_ext_stop       = '0;
+  assign vio_reset            = '0;
+  assign vio_boot_mode        = '0;
+  assign vio_boot_mode_sel    = '0;
+  assign vio_ext_start        = '0;
+  assign vio_ext_stop         = '0;
+  assign vio_start_address_i  = '0;
 `endif
 
 `ifdef USE_RESET
@@ -252,8 +255,9 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
   assign sys_rst = ~sys_resetn | vio_reset;
 `endif
   assign boot_mode  = vio_boot_mode_sel ? vio_boot_mode : boot_mode_i;
-  assign ext_start  = vio_ext_start;
-  assign ext_stop   = vio_ext_stop;
+  assign ext_start        = vio_ext_start;
+  assign ext_stop         = vio_ext_stop;
+  assign start_address_i  = vio_start_address_i;
 
   //////////////////
   //  Reset Sync  //
@@ -667,6 +671,7 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
     .axi_ext_slv_rsp_i  ( '0 ),
     .ext_start          ( ext_start ),  // atg
     .ext_stop           ( ext_stop  ),
+    .start_address_i    ( start_address_i ),
 `ifdef USE_CFG_REGS
     .reg_ext_slv_req_o  ( cfg_reg_req ),
     .reg_ext_slv_rsp_i  ( cfg_reg_rsp ),

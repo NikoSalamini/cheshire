@@ -107,7 +107,8 @@ module cheshire_soc import cheshire_pkg::*; #(
   output logic [UsbNumPorts-1:0] usb_dp_o,
   // ATG pulse signals
   input ext_start,
-  input ext_stop
+  input ext_stop,
+  input logic [Cfg.AddrWidth-1:0] start_address_i
 );
 
   `include "axi/typedef.svh"
@@ -1575,20 +1576,24 @@ module cheshire_soc import cheshire_pkg::*; #(
     cheshire_atg_wrap #(
       .MaxReadTxns      (),
       .MaxWriteTxns     (),
-      .NumBurstBeats    (32'd256),
+      .NumLines         (Cfg.LlcNumLines),
+      .SetAssociativity (Cfg.LlcSetAssoc),
+      .NumBlocks        (Cfg.LlcNumBlocks),
+      .NumBurstBeats    (32'd1),
       .AddrWidth        ( Cfg.AddrWidth     ),
       .DataWidth        ( Cfg.AxiDataWidth  ),
       .IdWidth          ( Cfg.AxiMstIdWidth ),
       .UserWidth        ( Cfg.AxiUserWidth  ),
-      .axi_mst_req_t    ( axi_mst_req_t     ), // TODO: check that this type is ok for the 
+      .axi_mst_req_t    ( axi_mst_req_t     ), 
       .axi_mst_rsp_t    ( axi_mst_rsp_t     )
     ) i_atg (
       .clk_i,
       .rst_ni,
       .axi_mst_req_o  ( axi_atg_req_precut ),
       .axi_mst_rsp_i  ( axi_atg_rsp_precut ),
-      .ext_start,                             // HW VIOs
-      .ext_stop
+      .ext_start,                             // HW VIO
+      .ext_stop,                              // HW VIO
+      .start_address_i                        // HW VIO
     );
 
     // AXI Cut

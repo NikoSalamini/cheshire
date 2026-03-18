@@ -12,7 +12,13 @@ module cheshire_atg_wrap #(
   /// Maximum number of AXI write bursts outstanding at the same time
   parameter int unsigned MaxWriteTxns  = 32'd32,
   /// Number of bursts beats to be generated
-  parameter int unsigned NumBurstBeats = 32'd256,
+  parameter int unsigned NumBurstBeats      = 32'd1,
+  /// NumLines
+  parameter int unsigned NumLines			      = 32'd256,
+  /// Number of ways of the LLC
+  parameter int unsigned SetAssociativity	  = 32'd8,
+  /// Block Width   
+  parameter int unsigned NumBlocks          = 32'd8,
   // AXI Bus Types
   parameter int unsigned AddrWidth      = 32'd48,
   parameter int unsigned DataWidth      = 32'd64,
@@ -21,30 +27,35 @@ module cheshire_atg_wrap #(
   parameter type         axi_mst_req_t  = logic,
   parameter type         axi_mst_rsp_t  = logic
 ) (
-  input   logic           clk_i,
-  input   logic           rst_ni,
-  input   logic           ext_start,      
-  input   logic           ext_stop,
-  output  axi_mst_req_t   axi_mst_req_o,
-  input   axi_mst_rsp_t   axi_mst_rsp_i
+  input   logic                 clk_i,
+  input   logic                 rst_ni,
+  input   logic                 ext_start,      
+  input   logic                 ext_stop,
+  input   logic [AddrWidth-1:0] start_address_i,
+  output  axi_mst_req_t         axi_mst_req_o,
+  input   axi_mst_rsp_t         axi_mst_rsp_i
 );
 
   /* NEW */
   axi_traffic_generator # (
-    .MaxReadTxns    (MaxReadTxns),
-    .MaxWriteTxns   (MaxWriteTxns),
-    .AddrWidth      (AddrWidth),
-    .DataWidth      (DataWidth),
-    .IdWidth        (IdWidth),
-    .UserWidth      (UserWidth),
-    .axi_req_t      (axi_mst_req_t),
-    .axi_resp_t     (axi_mst_rsp_t)
+    .MaxReadTxns      (MaxReadTxns),
+    .MaxWriteTxns     (MaxWriteTxns),
+    .NumLines         (NumLines),
+    .SetAssociativity (SetAssociativity),
+    .NumBlocks        (NumBlocks),
+    .AddrWidth        (AddrWidth),
+    .DataWidth        (DataWidth),
+    .IdWidth          (IdWidth),
+    .UserWidth        (UserWidth),
+    .axi_req_t        (axi_mst_req_t),
+    .axi_resp_t       (axi_mst_rsp_t)
   ) i_axi_traffic_generator (
     .clk_i,
     .rst_ni,
     .mst_req_o (axi_mst_req_o),
     .mst_resp_i(axi_mst_rsp_i),
     .ext_start,
-    .ext_stop
+    .ext_stop,
+    .start_address_i
   );
 endmodule

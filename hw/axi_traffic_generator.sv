@@ -1,4 +1,4 @@
-// Copyright 2026 ETH Zurich and University of Bologna.
+// Copyright 2023 ETH Zurich and University of Bologna.
 // Solderpad Hardware License, Version 0.51, see LICENSE for details.
 // SPDX-License-Identifier: SHL-0.51
 //
@@ -10,18 +10,32 @@
 
 module axi_traffic_generator #(
   /// Maximum number of AXI read bursts outstanding at the same time
-  parameter int unsigned MaxReadTxns   = 32'd0,
+  parameter int unsigned MaxReadTxns        = 32'd0,
   /// Maximum number of AXI write bursts outstanding at the same time
-  parameter int unsigned MaxWriteTxns  = 32'd0,
+  parameter int unsigned MaxWriteTxns       = 32'd0,
   /// Number of bursts beats to be generated
-  parameter int unsigned NumBurstBeats = 32'd256,
+  parameter int unsigned NumBurstBeats      = 32'd1,
+  /// TAG = [47:14], CACHELINE_IDX = [13:6], BLOCK = [5:3], BLOCK OFFSET = [2:0] (defult)
+  /// Tag Width
+  parameter int unsigned TagLength          = 32'd34, 
+  /// NumLines
+  parameter int unsigned NumLines			      = 32'd256,
+  /// Number of ways of the LLC
+  parameter int unsigned SetAssociativity	  = 32'd8,
+  /// Block Width   
+  parameter int unsigned NumBlocks          = 32'd8,
   // AXI Bus Types
   parameter int unsigned AddrWidth     = 32'd0,
   parameter int unsigned DataWidth     = 32'd0,
   parameter int unsigned IdWidth       = 32'd0,
   parameter int unsigned UserWidth     = 32'd0,
   parameter type         axi_req_t     = logic,
-  parameter type         axi_resp_t    = logic
+  parameter type         axi_resp_t    = logic,
+  parameter type         axi_aw_chan_t = logic,
+  parameter type         axi_w_chan_t  = logic,
+  parameter type         axi_b_chan_t  = logic,
+  parameter type         axi_ar_chan_t = logic,
+  parameter type         axi_r_chan_t  = logic
 )(
   input  logic  clk_i,  // clock
   input  logic  rst_ni, // active low
@@ -30,28 +44,55 @@ module axi_traffic_generator #(
   input ext_start,      
   input ext_stop,
 
+  // Input Address
+  input logic [AddrWidth-1:0] start_address_i,
+
   // Output / Master Port
   output axi_req_t  mst_req_o,
   input  axi_resp_t mst_resp_i
 );
 
 /* FSM state */
-typedef enum logic [1:0] {IDLE, INIT_ADDR, SEND_UNTIL_LAST} state_e;
+typedef enum logic [2:0] {
+  IDLE,
+  INIT_START_ADDR,
+  SET_NEXT_ADDRESS,
+  SEND_BURSTS
+} state_e;
 state_e state_d, state_q;
-
-/* Burst's beats counter */
-localparam int unsigned CntBeatsWidth = (NumBurstBeats > 1) ? $clog2(NumBurstBeats) : 32'd1;
-typedef logic [CntBeatsWidth-1:0] cnt_beats_t;
-cnt_beats_t cnt_beats_d, cnt_beats_q;
 
 // Outstanding Bursts (TODO)
 // localparam int unsigned CntIdxWidth = (MaxWriteTxns > 1) ? $clog2(MaxWriteTxns) : 32'd1;
 // typedef logic [CntIdxWidth-1:0]         cnt_idx_t;
 // cnt_idx_t cnt_burst_id_d, cnt_burst_id_q;
 
+/* Burst's beats counter */
+localparam int unsigned CntBeatsWidth = (NumBurstBeats > 1) ? $clog2(NumBurstBeats) : 32'd1;
+localparam int unsigned BeatBytes     = DataWidth/8;
+typedef logic [CntBeatsWidth-1:0] cnt_beats_t;
+cnt_beats_t cnt_beats_d, cnt_beats_q;
+
 /* logic to catch the pulses */
 logic start_req_d, start_req_q;
 logic stop_req_d,  stop_req_q;
+
+/* logic to configure the start addr and end addr */
+logic [AddrWidth-1:0] start_address_d, start_address_q;
+logic [AddrWidth-1:0] end_address_d, end_address_q;		// UNUSED (TODO)
+
+/* Counter for the number of ways already covered */
+typedef logic [$clog2(SetAssociativity)-1:0] cnt_ways_t;
+cnt_ways_t cnt_ways_d, cnt_ways_q;
+
+/* logic to keep the address to be used for the transaction */
+// cacheline idx upper and lower
+localparam int unsigned CachelineIdxLower = $clog2(NumBlocks) + $clog2(DataWidth/8);
+localparam int unsigned CachelineIdxUpper = ($clog2(NumLines) + CachelineIdxLower) - 1;
+// tag idx upper and lower to have different tags on all the ways
+localparam int unsigned TagIdxLower	= CachelineIdxUpper + 1;
+localparam int unsigned TagIdxUpper	= ($clog2(SetAssociativity) + TagIdxLower) - 1;
+// logic for the burst address
+logic [AddrWidth-1:0] burst_address_d, burst_address_q;
 
 // next state logic
 always_comb begin
@@ -59,6 +100,15 @@ always_comb begin
   // sticky pulse regs
   start_req_d = start_req_q;
   stop_req_d  = stop_req_q;
+
+  // start and end address, burst address
+  start_address_d = start_address_q;
+  end_address_d   = end_address_q;
+  burst_address_d = burst_address_q;
+
+  // counters assignment
+  cnt_ways_d = cnt_ways_q;
+  cnt_beats_d = cnt_beats_q;
 
   // capture start pulse
   if (ext_start)
@@ -82,11 +132,11 @@ always_comb begin
   mst_req_o.b_ready   = '1; // always equal to 1
 
   // other aw signals
-  mst_req_o.aw.cache  = 4'b1010; // configured WA [3] bit and cacheable [0] bit (TODO: ask how should i configure this)
-  mst_req_o.aw.prot   = '0;
-  mst_req_o.aw.user   = '1; // TODO: TAG?
-  mst_req_o.aw.lock   = '0; // (unused) AxLOCK is used to raise an error if someone writes the region of memory while this transaction is running
-  mst_req_o.aw.qos    = '0; // not used
+  mst_req_o.aw.cache  = 4'b1010;    // configured WA [3] bit and cacheable [0] bit (TODO: ask how should i configure this)
+  mst_req_o.aw.prot   = '0;         // prot not used
+  mst_req_o.aw.user   = '0;         // TODO: TAG?
+  mst_req_o.aw.lock   = '0;         // (unused) AxLOCK is used to raise an error if someone writes the region of memory while this transaction is running
+  mst_req_o.aw.qos    = '0;         // not used
 
   /* Set the read channel to 0s to have AXI4 compliancy. It cannot be X */
   mst_req_o.ar_valid  = '0;
@@ -95,24 +145,19 @@ always_comb begin
   mst_req_o.r_ready   = '1; // always ready to receive reads (unused but it's for compliancy)
 
   // other ar signals
-  mst_req_o.ar.cache  = '0;
-  mst_req_o.ar.prot   = '0;
-  mst_req_o.ar.user   = '1; // TODO: TAG?
+  mst_req_o.ar.cache  = '0; // caching channel not used
+  mst_req_o.ar.prot   = '0; // prot not used
+  mst_req_o.ar.user   = '0; // TODO: TAG?
   mst_req_o.ar.lock   = '0; // (unused) AxLOCK is used to raise an error if someone writes the region of memory while this transaction is running
   mst_req_o.ar.qos    = '0; // not used
 
-  // burst parameters. TODO: fixed parameters for now
+  // burst parameters 
   mst_req_o.aw.burst  = axi_pkg::BURST_INCR;  // INCR burst: the slave increases the addresses according to AxSIZE
-  mst_req_o.aw.len    = NumBurstBeats - 1;    // awlen + 1 = num_beats_burst --> 255 + 1 = 256 beats
+  mst_req_o.aw.len    = NumBurstBeats - 1;    // awlen + 1 = num_beats_burst --> 1 - 1 = 0 --> 1 beat
   mst_req_o.aw.size   = $clog2(DataWidth/8);  // bytes per beat = 2^size. Set to the max size according to DataWidth. 
-  mst_req_o.ar.burst  = axi_pkg::BURST_INCR;
-  mst_req_o.ar.len    = NumBurstBeats - 1;
+  mst_req_o.ar.burst  = axi_pkg::BURST_INCR;  // just one address
+  mst_req_o.ar.len    = NumBurstBeats - 1;    // same for arlen
   mst_req_o.ar.size   = $clog2(DataWidth/8);
-
-  /* NB: DataWidth = 64 (8 bytes), We cover a range of addresses from 0-0x800 */
-
-  // burst counter assignment
-  cnt_beats_d = cnt_beats_q;
 
   // switch case 
   case (state_q)
@@ -121,44 +166,73 @@ always_comb begin
     IDLE: begin
       /* wait for start pulse and aw_ready == 1*/
       if (start_req_q == '1) begin 
-          start_req_d = '0;         // clear start request
-          state_d     = INIT_ADDR;  // init address   
+        start_address_d = start_address_i;  // init start
+        start_req_d     = '0;               // clear start request
+        state_d         = INIT_START_ADDR;        // init address   
       end
     end
 
-    // init address
-    INIT_ADDR: begin
-      /* set aw.addr */
-      mst_req_o.aw_valid   = '1; // set aw_valid
-      mst_req_o.aw.addr    = '0; // TODO: configurable address range
+    // init start address for the interference
+    INIT_START_ADDR: begin
+      burst_address_d	= start_address_q;	// init burst start address
+      state_d = SET_NEXT_ADDRESS;         // setting the next address for the burst
+    end
+
+    // set next address for the burst
+    SET_NEXT_ADDRESS: begin
+      // set aw.addr 
+      mst_req_o.aw_valid  = '1;					      // set aw_valid
+      mst_req_o.aw.addr   = burst_address_q;  // start address to be used
       if (mst_resp_i.aw_ready) begin
-        cnt_beats_d         = '0;               // reset the counter
-        state_d             = SEND_UNTIL_LAST;  // next state 
+        // set state and counters
+        state_d     = SEND_BURSTS;    // next state 
+        cnt_beats_d = '0;					    // reset the counter
+        cnt_ways_d	= cnt_ways_q + 1;	// increase the number of ways that has been targeted
+
+        /* set the address for the next transaction */
+        if (cnt_ways_q == SetAssociativity - 1) begin 
+          // move to next cache line
+          burst_address_d = burst_address_q;                          // keep all the other bits the same
+          burst_address_d[CachelineIdxUpper:CachelineIdxLower] =
+            burst_address_q[CachelineIdxUpper:CachelineIdxLower] + 1; // modify the bits involving the cachelines
+
+          // reset the tag for the ways
+          burst_address_d[TagIdxUpper:TagIdxLower] = '0;              
+          cnt_ways_d = '0;
+        end
+        else begin
+            // move the next tag
+            burst_address_d = burst_address_q;
+            burst_address_d[TagIdxUpper:TagIdxLower] = burst_address_q[TagIdxUpper:TagIdxLower] + 1;
+        end 
       end
     end
 
-    SEND_UNTIL_LAST: begin
+    // send bursts until stop
+    SEND_BURSTS: begin
       // w_valid set to 1
       mst_req_o.w_valid = 1'b1;
 
-      // data is the current beat (incremental)
-      mst_req_o.w.data = cnt_beats_q;
+      // data is all '1
+      mst_req_o.w.data = '1;
 
       // last beat generation
-      if (cnt_beats_q == NumBurstBeats - 1)
+      if (cnt_beats_q == NumBurstBeats - 1) begin
         mst_req_o.w.last = 1'b1;
+      end
 
-      // new beat correctly sent
+      // wait until slave is ready
       if (mst_resp_i.w_ready) begin
-        cnt_beats_d = cnt_beats_q + 1;  // Update the counter. It cannot overflow since it perfectly fit the length of the burst.
+        // update beat counters
+        cnt_beats_d = cnt_beats_q + 1;  
 
-        // check for the last beat
+        // check for the last beat of the burst
         if (cnt_beats_q == NumBurstBeats - 1) begin
           if (stop_req_q) begin
-            stop_req_d = '0;      // clean stop sticky reg
+            stop_req_d = '0;      // clean stop sticky reg  
             state_d    = IDLE;    // back to IDLE
           end else begin
-            state_d = INIT_ADDR;  // init the address for the next burst
+            state_d = SET_NEXT_ADDRESS;  // init the address for the next burst
           end
         end
       end
@@ -172,7 +246,11 @@ end
 // Regs
 `FFARN(state_q, state_d, IDLE, clk_i, rst_ni)
 `FFARN(cnt_beats_q, cnt_beats_d, '0, clk_i, rst_ni)
+`FFARN(cnt_ways_q, cnt_ways_d, '0, clk_i, rst_ni)
 `FFARN(start_req_q, start_req_d, '0, clk_i, rst_ni)
 `FFARN(stop_req_q,  stop_req_d,  '0, clk_i, rst_ni)
+`FFARN(start_address_q,  start_address_d,  '0, clk_i, rst_ni)
+`FFARN(end_address_q,  end_address_d,  '0, clk_i, rst_ni)
+`FFARN(burst_address_q,  burst_address_d,  '0, clk_i, rst_ni)
 
 endmodule
