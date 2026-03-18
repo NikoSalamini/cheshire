@@ -1,0 +1,1055 @@
+which: no riscv64-unknown-elf-gcc in (/scratch2/nsalamini/nikoenv/bin:/usr/pack/riscv-1.0-kgf/riscv64-gcc-linux-gnu-11.2.0/bin:/usr/pack/riscv-1.0-kgf/STARTUP:/home/nsalamini/bin:/home/nsalamini/.vscode-server/cli/servers/Stable-61b3d0ab13be7dda2389f1d3e60a119c7f660cc3/server/bin/remote-cli:/home/nsalamini/bin:/home/nsalamini/bin:/usr/lib64/ccache:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin)
+which: no riscv64-unknown-elf-gcc in (/scratch2/nsalamini/nikoenv/bin:/usr/pack/riscv-1.0-kgf/riscv64-gcc-linux-gnu-11.2.0/bin:/usr/pack/riscv-1.0-kgf/STARTUP:/home/nsalamini/bin:/home/nsalamini/.vscode-server/cli/servers/Stable-61b3d0ab13be7dda2389f1d3e60a119c7f660cc3/server/bin/remote-cli:/home/nsalamini/bin:/home/nsalamini/bin:/usr/lib64/ccache:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin)
+which: no riscv64-unknown-elf-gcc in (/scratch2/nsalamini/nikoenv/bin:/usr/pack/riscv-1.0-kgf/riscv64-gcc-linux-gnu-11.2.0/bin:/usr/pack/riscv-1.0-kgf/STARTUP:/home/nsalamini/bin:/home/nsalamini/.vscode-server/cli/servers/Stable-61b3d0ab13be7dda2389f1d3e60a119c7f660cc3/server/bin/remote-cli:/home/nsalamini/bin:/home/nsalamini/bin:/usr/lib64/ccache:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin)
+which: no riscv64-unknown-elf-gcc in (/scratch2/nsalamini/nikoenv/bin:/usr/pack/riscv-1.0-kgf/riscv64-gcc-linux-gnu-11.2.0/bin:/usr/pack/riscv-1.0-kgf/STARTUP:/home/nsalamini/bin:/home/nsalamini/.vscode-server/cli/servers/Stable-61b3d0ab13be7dda2389f1d3e60a119c7f660cc3/server/bin/remote-cli:/home/nsalamini/bin:/home/nsalamini/bin:/usr/lib64/ccache:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin)
+which: no riscv64-unknown-elf-gcc in (/scratch2/nsalamini/nikoenv/bin:/usr/pack/riscv-1.0-kgf/riscv64-gcc-linux-gnu-11.2.0/bin:/usr/pack/riscv-1.0-kgf/STARTUP:/home/nsalamini/bin:/home/nsalamini/.vscode-server/cli/servers/Stable-61b3d0ab13be7dda2389f1d3e60a119c7f660cc3/server/bin/remote-cli:/home/nsalamini/bin:/home/nsalamini/bin:/usr/lib64/ccache:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin:/usr/sepp/bin:/usr/local/AppImage/bin:/usr/local/anaconda3/bin)
+dirname: missing operand
+Try 'dirname --help' for more information.
+find: ‘/libexec/gcc/riscv64-unknown-elf/**/liblto_plugin.so’: No such file or directory
+/scratch2/nsalamini/github_new_new/cheshire/.bender/git/checkouts/register_interface-902ad5bfde7bb98c/vendor/lowrisc_opentitan/util/regtool.py -r /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/src/regs/chs_xilinx_regs.hjson --outdir /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/src/regs/
+bender -d /scratch2/nsalamini/github_new_new/cheshire script vivado -t fpga -t vcu118 -t rtl -t cva6 -t cv64a6_rt > /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/scripts/add_sources.vcu118.tcl
+mkdir -p /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/
+cd /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/ && vitis-2022.1 vivado -mode batch -log ../vcu118.clkwiz.log -jou ../vcu118.clkwiz.jou -source /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/scripts/impl_ip.tcl -tclargs vcu118 clkwiz
+Detected setup: [rhel8.8i]
+
+****** Vivado v2022.1 (64-bit)
+  **** SW Build 3526262 on Mon Apr 18 15:47:01 MDT 2022
+  **** IP Build 3524634 on Mon Apr 18 20:55:01 MDT 2022
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+source /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/scripts/impl_ip.tcl
+# set xilinx_root [file dirname [file dirname [file normalize [info script]]]]
+# source ${xilinx_root}/scripts/common.tcl
+## set bpart(genesys2) "digilentinc.com:genesys2:part0:1.1"
+## set fpart(genesys2) "xc7k325tffg900-2"
+## set hwdev(genesys2) "xc7k325t_0"
+## set cfgmp(genesys2) "s25fl256sxxxxxx0-spi-x1_x2_x4"
+## set bpart(vcu128) "xilinx.com:vcu128:part0:1.0"
+## set fpart(vcu128) "xcvu37p-fsvh2892-2L-e"
+## set hwdev(vcu128) "xcvu37p_0"
+## set cfgmp(vcu128) "mt25qu02g-spi-x1_x2_x4"
+## set bpart(vcu118) "xilinx.com:vcu118:part0:2.4"
+## set fpart(vcu118) "xcvu9p-flga2104-2L-e"
+## set hwdev(vcu118) "xcvu9p_0"
+## set cfgmp(vcu118) "mt25qu01g-spi-x1_x2_x4"
+## proc init_impl {xilinx_root argc argv} {
+##     global fpart
+##     global bpart
+##     # We declare these variables into the global context
+##     global num_threads
+##     global num_jobs
+##     global project_root
+##     global board
+##     global proj
+##     # Check argument count
+##     if { $argc < 2 } {
+##         puts "Error: Insufficient implementation arguments (${argc}): ${argv}."
+##         return -code error
+##     }
+##     # Configure parallelism
+##     set num_threads 8
+##     set num_jobs 8
+##     # Get arguments
+##     set board [lindex $argv 0]
+##     set proj [lindex $argv 1]
+##     # Set up multithreading
+##     set_param general.maxThreads $num_threads
+##     # Remove prior build
+##     set project_root ${xilinx_root}/build/${board}.${proj}
+##     file delete -force [glob -nocomplain ${project_root}/*]
+##     # Create project
+##     create_project $proj $project_root -force -part $fpart($board)
+##     set_property board_part $bpart($board) [current_project]
+## }
+## proc open_target {xilinx_root argc argv suffix} {
+##     global hwdev
+##     # We declare these variables into the global context
+##     global project_root
+##     global board
+##     global hw_tgt
+##     global hw_device
+##     # Check argument count
+##     if { $argc < 3 } {
+##         puts "Error: Insufficient target arguments (${argc}): ${argv}."
+##         return -code error
+##     }
+##     # Get arguments
+##     set url [lindex $argv 0]
+##     set path [lindex $argv 1]
+##     set board [lindex $argv 2]
+##     # Remove prior build
+##     set project_root ${xilinx_root}/build/${board}.${suffix}
+##     file delete -force [glob -nocomplain ${project_root}/*]
+##     # Connect to HW server
+##     open_hw_manager
+##     connect_hw_server -url $url
+##     # Open HW target, set JTAG frequency
+##     set hw_tgts [get_hw_targets ${url}/${path}]
+##     # From all matching targets, choose last (most specific) one
+##     set hw_tgt [lindex ${hw_tgts} [expr { [llength ${hw_tgts}] - 1 }]]
+##     open_hw_target $hw_tgt
+##     set_property PARAM.FREQUENCY 15000000 $hw_tgt
+##     # Get hardware device
+##     set hw_device [get_hw_devices $hwdev($board)]
+## }
+## proc no_cfg_exit {proj board} {
+##     puts "Error: Unsupported board ${board} for ${proj}."
+##     return -code error
+## }
+## proc gen_reports {rptdir} {
+##     file delete -force $rptdir
+##     file mkdir ${rptdir}
+##     # tclint-disable spacing, line-length
+##     check_timing             -file ${rptdir}/check_timing.rpt       -verbose
+##     report_timing            -file ${rptdir}/timing_worst_100.rpt   -max_paths 100 -nworst 100 -delay_type max -sort_by slack
+##     report_timing            -file ${rptdir}/timing_worst.rpt       -nworst 1 -delay_type max -sort_by group
+##     report_utilization       -file ${rptdir}/utilization.rpt        -hierarchical
+##     report_cdc               -file ${rptdir}/cdc.rpt
+##     report_clock_interaction -file ${rptdir}/clock_interaction.rpt
+##     report_timing_summary    -file ${rptdir}/timing_summary.rpt
+##     # tclint-enable spacing, line-length
+## }
+## proc insert_ilas {clk_net_name} {
+##     global project_root
+##     # Get nets to debug
+##     set debug_nets [lsort -dictionary [get_nets -hier -filter {MARK_DEBUG == 1}]]
+##     # Create debug core only if there are probes
+##     if { ![llength $debug_nets] } { return }
+##     # Create and configure debug core
+##     create_debug_core i_ila ila
+##     set_property -dict [list \
+##         ALL_PROBE_SAME_MU {true} ALL_PROBE_SAME_MU_CNT {4} C_ADV_TRIGGER {true} \
+##         C_DATA_DEPTH {16384} C_EN_STRG_QUAL {true} C_INPUT_PIPE_STAGES {0} \
+##         C_TRIGIN_EN {false} C_TRIGOUT_EN {false} \
+##         ] [get_debug_cores i_ila]
+##     # Connect SoC clock
+##     set_property port_width 1 [get_debug_ports i_ila/clk]
+##     connect_debug_port i_ila/clk [get_nets $clk_net_name]
+##     # Loop through debug nets (add extra list element to ensure last net is processed)
+##     set net_name_last ""
+##     set i 0
+##     foreach net [concat $debug_nets {""}] {
+##         # Remove trailing array index
+##         regsub {\[[0-9]*\]$} $net {} net_name
+##         # Create probe after all signals with the same name have been collected
+##         if { $net_name_last != $net_name } {
+##             if { $net_name_last != "" } {
+##                 puts "Creating probe $i of width [llength $sig_list] for `$net_name_last`."
+##                 # probe0 already exists, and does not need to be created
+##                 if { $i != 0 } { create_debug_port i_ila probe }
+##                 set_property port_width [llength $sig_list] [get_debug_ports i_ila/probe$i]
+##                 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports i_ila/probe$i]
+##                 connect_debug_port i_ila/probe$i [get_nets $sig_list]
+##                 incr i
+##             }
+##             set sig_list ""
+##         }
+##         lappend sig_list $net
+##         set net_name_last $net_name
+##     }
+##     # Save constraints, then implement the debug core
+##     save_constraints -force
+##     implement_debug_core
+## }
+# init_impl $xilinx_root $argc $argv
+# switch $proj {
+# 
+#     clkwiz {
+#         create_ip -name clk_wiz -vendor xilinx.com -library ip -version 6.0 -module_name $proj
+#         switch $board {
+#             genesys2 {
+#                 set_property -dict [list \
+#                     CONFIG.PRIM_SOURCE {No_buffer} \
+#                     CONFIG.PRIM_IN_FREQ {200.000} \
+#                     CONFIG.CLKOUT1_USED {true} \
+#                     CONFIG.CLKOUT2_USED {true} \
+#                     CONFIG.CLKOUT3_USED {true} \
+#                     CONFIG.CLKOUT4_USED {true} \
+#                     CONFIG.CLK_OUT1_PORT {clk_50} \
+#                     CONFIG.CLK_OUT2_PORT {clk_48} \
+#                     CONFIG.CLK_OUT3_PORT {clk_20} \
+#                     CONFIG.CLK_OUT4_PORT {clk_10} \
+#                     CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {50.000} \
+#                     CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {48.000} \
+#                     CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {20.000} \
+#                     CONFIG.CLKOUT4_REQUESTED_OUT_FREQ {10.000} \
+#                     CONFIG.CLKIN1_JITTER_PS {50.0} \
+#                     CONFIG.MMCM_CLKFBOUT_MULT_F {6.000} \
+#                     CONFIG.MMCM_CLKIN1_PERIOD {5.000} \
+#                     CONFIG.MMCM_CLKOUT1_DIVIDE {24} \
+#                     CONFIG.MMCM_CLKOUT2_DIVIDE {25} \
+#                     CONFIG.MMCM_CLKOUT3_DIVIDE {60} \
+#                     CONFIG.MMCM_CLKOUT4_DIVIDE {120} \
+#                     CONFIG.NUM_OUT_CLKS {4} \
+#                     CONFIG.CLKOUT1_JITTER {112.316} \
+#                     CONFIG.CLKOUT1_PHASE_ERROR {89.971} \
+#                     CONFIG.CLKOUT2_JITTER {129.198} \
+#                     CONFIG.CLKOUT2_PHASE_ERROR {89.971} \
+#                     CONFIG.CLKOUT3_JITTER {155.330} \
+#                     CONFIG.CLKOUT3_PHASE_ERROR {89.971} \
+#                     CONFIG.CLKOUT4_JITTER {178.053} \
+#                     CONFIG.CLKOUT4_PHASE_ERROR {89.971} \
+#                     ] [get_ips $proj]
+#             }
+#             vcu128 {
+#                 set_property -dict [list \
+#                     CONFIG.CLK_IN1_BOARD_INTERFACE {Custom} \
+#                     CONFIG.RESET_BOARD_INTERFACE {Custom} \
+#                     CONFIG.USE_RESET {true} \
+#                     CONFIG.PRIM_SOURCE {No_buffer} \
+#                     CONFIG.PRIM_IN_FREQ {100.000} \
+#                     CONFIG.CLKOUT1_USED {true} \
+#                     CONFIG.CLKOUT2_USED {true} \
+#                     CONFIG.CLKOUT3_USED {true} \
+#                     CONFIG.CLKOUT4_USED {true} \
+#                     CONFIG.CLK_OUT1_PORT {clk_50} \
+#                     CONFIG.CLK_OUT2_PORT {clk_48} \
+#                     CONFIG.CLK_OUT3_PORT {clk_20} \
+#                     CONFIG.CLK_OUT4_PORT {clk_10} \
+#                     CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {50.000} \
+#                     CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {48.000} \
+#                     CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {20.000} \
+#                     CONFIG.CLKOUT4_REQUESTED_OUT_FREQ {10.000} \
+#                     CONFIG.MMCM_CLKFBOUT_MULT_F {12.000} \
+#                     CONFIG.MMCM_CLKIN1_PERIOD {5.000} \
+#                     CONFIG.MMCM_CLKOUT1_DIVIDE {24} \
+#                     CONFIG.MMCM_CLKOUT2_DIVIDE {25} \
+#                     CONFIG.MMCM_CLKOUT3_DIVIDE {60} \
+#                     CONFIG.MMCM_CLKOUT4_DIVIDE {120} \
+#                     CONFIG.NUM_OUT_CLKS {4} \
+#                     CONFIG.CLKOUT1_JITTER {112.316} \
+#                     CONFIG.CLKOUT1_PHASE_ERROR {89.971} \
+#                     CONFIG.CLKOUT2_JITTER {129.198} \
+#                     CONFIG.CLKOUT2_PHASE_ERROR {89.971} \
+#                     CONFIG.CLKOUT3_JITTER {155.330} \
+#                     CONFIG.CLKOUT3_PHASE_ERROR {89.971} \
+#                     CONFIG.CLKOUT4_JITTER {178.053} \
+#                     CONFIG.CLKOUT4_PHASE_ERROR {89.971} \
+#                     ] [get_ips $proj]
+#             }
+#             vcu118 {
+#                 set_property -dict [list \
+#                     CONFIG.CLK_IN1_BOARD_INTERFACE {Custom} \
+#                     CONFIG.RESET_BOARD_INTERFACE {Custom} \
+#                     CONFIG.USE_RESET {true} \
+#                     CONFIG.PRIM_SOURCE {No_buffer} \
+#                     CONFIG.PRIM_IN_FREQ {250.000} \
+#                     CONFIG.CLKOUT1_USED {true} \
+#                     CONFIG.CLKOUT2_USED {true} \
+#                     CONFIG.CLKOUT3_USED {true} \
+#                     CONFIG.CLKOUT4_USED {true} \
+#                     CONFIG.CLK_OUT1_PORT {clk_50} \
+#                     CONFIG.CLK_OUT2_PORT {clk_48} \
+#                     CONFIG.CLK_OUT3_PORT {clk_20} \
+#                     CONFIG.CLK_OUT4_PORT {clk_10} \
+#                     CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {50.000} \
+#                     CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {48.000} \
+#                     CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {20.000} \
+#                     CONFIG.CLKOUT4_REQUESTED_OUT_FREQ {10.000} \
+#                     CONFIG.MMCM_CLKFBOUT_MULT_F {24.000} \
+#                     CONFIG.MMCM_CLKIN1_PERIOD {4.000} \
+#                     CONFIG.MMCM_CLKOUT0_DIVIDE_F {24.000} \
+#                     CONFIG.MMCM_CLKOUT1_DIVIDE {25} \
+#                     CONFIG.MMCM_CLKOUT2_DIVIDE {60} \
+#                     CONFIG.MMCM_CLKOUT3_DIVIDE {120} \
+#                     CONFIG.MMCM_CLKOUT4_DIVIDE {1} \
+#                     CONFIG.NUM_OUT_CLKS {4} \
+#                     CONFIG.CLKOUT1_JITTER {153.164} \
+#                     CONFIG.CLKOUT1_PHASE_ERROR {154.678} \
+#                     CONFIG.CLKOUT2_JITTER {154.376} \
+#                     CONFIG.CLKOUT2_PHASE_ERROR {154.678} \
+#                     CONFIG.CLKOUT3_JITTER {184.746} \
+#                     CONFIG.CLKOUT3_PHASE_ERROR {154.678} \
+#                     CONFIG.CLKOUT4_JITTER {213.887} \
+#                     CONFIG.CLKOUT4_PHASE_ERROR {154.678} \
+#                     ] [get_ips $proj]
+#             }
+#             default { nocfgexit $proj $board }
+#         }
+#     }
+# 
+#     vio {
+#         create_ip -name vio -vendor xilinx.com -library ip -version 3.0 -module_name $proj
+#         switch $board {
+#             genesys2 {
+#                 set_property -dict [list \
+#                     CONFIG.C_NUM_PROBE_OUT {3} \
+#                     CONFIG.C_PROBE_OUT0_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT1_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT2_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT1_WIDTH {2} \
+#                     CONFIG.C_EN_PROBE_IN_ACTIVITY {0} \
+#                     CONFIG.C_NUM_PROBE_IN {0} \
+#                     ] [get_ips $proj]
+#             }
+#             vcu118 {
+#                 set_property -dict [list \
+#                     CONFIG.C_NUM_PROBE_OUT {6} \
+#                     CONFIG.C_PROBE_OUT0_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT1_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT2_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT3_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT4_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT5_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT1_WIDTH {0} \
+#                     CONFIG.C_PROBE_OUT5_WIDTH {32} \
+#                     CONFIG.C_EN_PROBE_IN_ACTIVITY {0} \
+#                     CONFIG.C_NUM_PROBE_IN {0} \
+#                     ] [get_ips $proj]
+#             }
+#             vcu128 {
+#                 set_property -dict [list \
+#                     CONFIG.C_NUM_PROBE_OUT {3} \
+#                     CONFIG.C_PROBE_OUT0_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT1_INIT_VAL {0x2} \
+#                     CONFIG.C_PROBE_OUT2_INIT_VAL {0x1} \
+#                     CONFIG.C_PROBE_OUT1_WIDTH {2} \
+#                     CONFIG.C_EN_PROBE_IN_ACTIVITY {0} \
+#                     CONFIG.C_NUM_PROBE_IN {0} \
+#                     ] [get_ips $proj]
+#             }
+#             default { nocfgexit $proj $board }
+#         }
+#     }
+# 
+#     mig7s {
+#         create_ip -name mig_7series -vendor xilinx.com -library ip -module_name $proj
+#         # Inject existing project file
+#         file copy ${xilinx_root}/src/ips/${board}.${proj}.prj \
+#             ${project_root}/${proj}.srcs/sources_1/ip/${proj}/mig_a.prj
+#         switch $board {
+#             genesys2 {
+#                 set_property -dict [list \
+#                     CONFIG.XML_INPUT_FILE {mig_a.prj} \
+#                     CONFIG.RESET_BOARD_INTERFACE {Custom} \
+#                     CONFIG.MIG_DONT_TOUCH_PARAM {Custom} \
+#                     CONFIG.BOARD_MIG_PARAM {Custom} \
+#                     ] [get_ips $proj]
+#             }
+#             default { nocfgexit $proj $board }
+#         }
+#     }
+# 
+#     ddr4 {
+#         create_ip -name ddr4 -vendor xilinx.com -library ip -version 2.2 -module_name $proj
+#         switch $board {
+#             vcu128 {
+#                 set_property -dict [list \
+#                     CONFIG.C0.DDR4_Clamshell {true} \
+#                     CONFIG.C0_DDR4_BOARD_INTERFACE {ddr4_sdram} \
+#                     CONFIG.System_Clock {No_Buffer} \
+#                     CONFIG.Reference_Clock {No_Buffer} \
+#                     CONFIG.C0.DDR4_InputClockPeriod {10000} \
+#                     CONFIG.C0.DDR4_CLKOUT0_DIVIDE {3} \
+#                     CONFIG.C0.DDR4_MemoryPart {MT40A512M16HA-075E} \
+#                     CONFIG.C0.DDR4_DataWidth {72} \
+#                     CONFIG.C0.DDR4_DataMask {NO_DM_NO_DBI} \
+#                     CONFIG.C0.DDR4_Ecc {true} \
+#                     CONFIG.C0.DDR4_AxiDataWidth {512} \
+#                     CONFIG.C0.DDR4_AxiAddressWidth {32} \
+#                     CONFIG.C0.DDR4_AxiIDWidth {8} \
+#                     CONFIG.ADDN_UI_CLKOUT1_FREQ_HZ {100} \
+#                     CONFIG.C0.BANK_GROUP_WIDTH {1} \
+#                     CONFIG.C0.CS_WIDTH {2} \
+#                     CONFIG.C0.DDR4_AxiSelection {true} \
+#                     ] [get_ips $proj]
+#             }
+#             vcu118 {
+#                 set_property -dict [list \
+#                     CONFIG.System_Clock {No_Buffer} \
+#                     CONFIG.Reference_Clock {No_Buffer} \
+#                     CONFIG.C0_DDR4_BOARD_INTERFACE {ddr4_sdram_c1_062} \
+#                     CONFIG.C0.DDR4_InputClockPeriod {4000} \
+#                     CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5} \
+#                     CONFIG.C0.DDR4_MemoryPart {MT40A256M16LY-062E} \
+#                     CONFIG.C0.DDR4_TimePeriod {833} \
+#                     CONFIG.C0.DDR4_DataWidth {64} \
+#                     CONFIG.C0.DDR4_DataMask {DM_NO_DBI} \
+#                     CONFIG.C0.DDR4_MCS_ECC {false} \
+#                     CONFIG.C0.DDR4_CasWriteLatency {12} \
+#                     CONFIG.C0.DDR4_CasLatency {18} \
+#                     CONFIG.C0.DDR4_AxiDataWidth {512} \
+#                     CONFIG.C0.DDR4_AxiAddressWidth {31} \
+#                     CONFIG.C0.DDR4_AxiIDWidth {8} \
+#                     CONFIG.C0.BANK_GROUP_WIDTH {1} \
+#                     CONFIG.C0.DDR4_AxiSelection {true} \
+#                     ] [get_ips $proj]
+#             }
+#             default { nocfgexit $proj $board }
+#         }
+#     }
+# 
+# }
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/usr/pack/vitis-2022.1-zr/Vivado/2022.1/data/ip'.
+create_ip: Time (s): cpu = 00:00:10 ; elapsed = 00:00:12 . Memory (MB): peak = 3322.445 ; gain = 219.289 ; free physical = 86923 ; free virtual = 544292
+# set xci ${project_root}/${proj}.srcs/sources_1/ip/${proj}/${proj}.xci
+# generate_target all [get_files $xci]
+INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'clkwiz'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'clkwiz'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'clkwiz'...
+INFO: [IP_Flow 19-1686] Generating 'Implementation' target for IP 'clkwiz'...
+INFO: [IP_Flow 19-1686] Generating 'Change Log' target for IP 'clkwiz'...
+# create_ip_run [get_files -of_objects [get_fileset sources_1] $xci]
+# launch_run -jobs $num_jobs ${proj}_synth_1
+[Wed Mar 18 14:57:09 2026] Launched clkwiz_synth_1...
+Run output will be captured here: /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.runs/clkwiz_synth_1/runme.log
+# wait_on_run ${proj}_synth_1
+[Wed Mar 18 14:57:09 2026] Waiting for clkwiz_synth_1 to finish...
+
+*** Running vivado
+    with args -log clkwiz.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source clkwiz.tcl
+
+
+****** Vivado v2022.1 (64-bit)
+  **** SW Build 3526262 on Mon Apr 18 15:47:01 MDT 2022
+  **** IP Build 3524634 on Mon Apr 18 20:55:01 MDT 2022
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+source clkwiz.tcl -notrace
+Command: synth_design -top clkwiz -part xcvu9p-flga2104-2L-e -incremental_mode off -mode out_of_context
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xcvu9p'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xcvu9p'
+INFO: [Device 21-403] Loading part xcvu9p-flga2104-2L-e
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 4 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 1671342
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:04 . Memory (MB): peak = 3597.727 ; gain = 344.797 ; free physical = 84243 ; free virtual = 541200
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'clkwiz' [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.gen/sources_1/ip/clkwiz/clkwiz.v:71]
+INFO: [Synth 8-6157] synthesizing module 'clkwiz_clk_wiz' [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.gen/sources_1/ip/clkwiz/clkwiz_clk_wiz.v:71]
+INFO: [Synth 8-6157] synthesizing module 'MMCME4_ADV' [/usr/pack/vitis-2022.1-zr/Vivado/2022.1/scripts/rt/data/unisim_comp.v:63902]
+	Parameter BANDWIDTH bound to: OPTIMIZED - type: string 
+	Parameter CLKFBOUT_MULT_F bound to: 24.000000 - type: double 
+	Parameter CLKFBOUT_PHASE bound to: 0.000000 - type: double 
+	Parameter CLKFBOUT_USE_FINE_PS bound to: FALSE - type: string 
+	Parameter CLKIN1_PERIOD bound to: 4.000000 - type: double 
+	Parameter CLKOUT0_DIVIDE_F bound to: 24.000000 - type: double 
+	Parameter CLKOUT0_DUTY_CYCLE bound to: 0.500000 - type: double 
+	Parameter CLKOUT0_PHASE bound to: 0.000000 - type: double 
+	Parameter CLKOUT0_USE_FINE_PS bound to: FALSE - type: string 
+	Parameter CLKOUT1_DIVIDE bound to: 25 - type: integer 
+	Parameter CLKOUT1_DUTY_CYCLE bound to: 0.500000 - type: double 
+	Parameter CLKOUT1_PHASE bound to: 0.000000 - type: double 
+	Parameter CLKOUT1_USE_FINE_PS bound to: FALSE - type: string 
+	Parameter CLKOUT2_DIVIDE bound to: 60 - type: integer 
+	Parameter CLKOUT2_DUTY_CYCLE bound to: 0.500000 - type: double 
+	Parameter CLKOUT2_PHASE bound to: 0.000000 - type: double 
+	Parameter CLKOUT2_USE_FINE_PS bound to: FALSE - type: string 
+	Parameter CLKOUT3_DIVIDE bound to: 120 - type: integer 
+	Parameter CLKOUT3_DUTY_CYCLE bound to: 0.500000 - type: double 
+	Parameter CLKOUT3_PHASE bound to: 0.000000 - type: double 
+	Parameter CLKOUT3_USE_FINE_PS bound to: FALSE - type: string 
+	Parameter CLKOUT4_CASCADE bound to: FALSE - type: string 
+	Parameter COMPENSATION bound to: AUTO - type: string 
+	Parameter DIVCLK_DIVIDE bound to: 5 - type: integer 
+	Parameter STARTUP_WAIT bound to: FALSE - type: string 
+INFO: [Synth 8-6155] done synthesizing module 'MMCME4_ADV' (0#1) [/usr/pack/vitis-2022.1-zr/Vivado/2022.1/scripts/rt/data/unisim_comp.v:63902]
+INFO: [Synth 8-6157] synthesizing module 'BUFG' [/usr/pack/vitis-2022.1-zr/Vivado/2022.1/scripts/rt/data/unisim_comp.v:1082]
+INFO: [Synth 8-6155] done synthesizing module 'BUFG' (0#1) [/usr/pack/vitis-2022.1-zr/Vivado/2022.1/scripts/rt/data/unisim_comp.v:1082]
+INFO: [Synth 8-6155] done synthesizing module 'clkwiz_clk_wiz' (0#1) [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.gen/sources_1/ip/clkwiz/clkwiz_clk_wiz.v:71]
+INFO: [Synth 8-6155] done synthesizing module 'clkwiz' (0#1) [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.gen/sources_1/ip/clkwiz/clkwiz.v:71]
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:05 ; elapsed = 00:00:06 . Memory (MB): peak = 3658.664 ; gain = 405.734 ; free physical = 85331 ; free virtual = 542289
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:05 ; elapsed = 00:00:06 . Memory (MB): peak = 3676.477 ; gain = 423.547 ; free physical = 85330 ; free virtual = 542289
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:05 ; elapsed = 00:00:06 . Memory (MB): peak = 3676.477 ; gain = 423.547 ; free physical = 85330 ; free virtual = 542289
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3682.414 ; gain = 0.000 ; free physical = 85342 ; free virtual = 542301
+INFO: [Netlist 29-17] Analyzing 5 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.gen/sources_1/ip/clkwiz/clkwiz_ooc.xdc] for cell 'inst'
+Finished Parsing XDC File [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.gen/sources_1/ip/clkwiz/clkwiz_ooc.xdc] for cell 'inst'
+Parsing XDC File [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.gen/sources_1/ip/clkwiz/clkwiz_board.xdc] for cell 'inst'
+Finished Parsing XDC File [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.gen/sources_1/ip/clkwiz/clkwiz_board.xdc] for cell 'inst'
+Parsing XDC File [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.gen/sources_1/ip/clkwiz/clkwiz.xdc] for cell 'inst'
+Finished Parsing XDC File [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.gen/sources_1/ip/clkwiz/clkwiz.xdc] for cell 'inst'
+Parsing XDC File [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.runs/clkwiz_synth_1/dont_touch.xdc]
+Finished Parsing XDC File [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.runs/clkwiz_synth_1/dont_touch.xdc]
+Parsing XDC File [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.gen/sources_1/ip/clkwiz/clkwiz_late.xdc] for cell 'inst'
+Finished Parsing XDC File [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.gen/sources_1/ip/clkwiz/clkwiz_late.xdc] for cell 'inst'
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3787.070 ; gain = 0.000 ; free physical = 85243 ; free virtual = 542202
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 4 instances were transformed.
+  BUFG => BUFGCE: 4 instances
+
+INFO: [Timing 38-2] Deriving generated clocks
+Constraint Validation Runtime : Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.02 . Memory (MB): peak = 3787.070 ; gain = 0.000 ; free physical = 85242 ; free virtual = 542201
+INFO: [Designutils 20-5008] Incremental synthesis strategy off
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:15 ; elapsed = 00:00:16 . Memory (MB): peak = 3787.070 ; gain = 534.141 ; free physical = 85327 ; free virtual = 542287
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xcvu9p-flga2104-2L-e
+INFO: [Synth 8-6742] Reading net delay rules and data
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:15 ; elapsed = 00:00:16 . Memory (MB): peak = 3787.070 ; gain = 534.141 ; free physical = 85327 ; free virtual = 542287
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+Applied set_property KEEP_HIERARCHY = SOFT for inst. (constraint file  /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.runs/clkwiz_synth_1/dont_touch.xdc, line 9).
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:15 ; elapsed = 00:00:16 . Memory (MB): peak = 3787.070 ; gain = 534.141 ; free physical = 85331 ; free virtual = 542291
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:15 ; elapsed = 00:00:16 . Memory (MB): peak = 3787.070 ; gain = 534.141 ; free physical = 85329 ; free virtual = 542290
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 6840 (col length:120)
+BRAMs: 4320 (col length: RAMB18 360 RAMB36 180)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-7080] Parallel synthesis criteria is not met
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:16 ; elapsed = 00:00:17 . Memory (MB): peak = 3787.070 ; gain = 534.141 ; free physical = 85311 ; free virtual = 542276
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying XDC Timing Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:24 ; elapsed = 00:00:27 . Memory (MB): peak = 4007.820 ; gain = 754.891 ; free physical = 84725 ; free virtual = 541691
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:24 ; elapsed = 00:00:27 . Memory (MB): peak = 4007.820 ; gain = 754.891 ; free physical = 84725 ; free virtual = 541691
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:24 ; elapsed = 00:00:27 . Memory (MB): peak = 4026.852 ; gain = 773.922 ; free physical = 84727 ; free virtual = 541694
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:28 ; elapsed = 00:00:30 . Memory (MB): peak = 4032.789 ; gain = 779.859 ; free physical = 84835 ; free virtual = 541802
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:28 ; elapsed = 00:00:30 . Memory (MB): peak = 4032.789 ; gain = 779.859 ; free physical = 84835 ; free virtual = 541802
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:28 ; elapsed = 00:00:30 . Memory (MB): peak = 4032.789 ; gain = 779.859 ; free physical = 84835 ; free virtual = 541802
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:28 ; elapsed = 00:00:30 . Memory (MB): peak = 4032.789 ; gain = 779.859 ; free physical = 84835 ; free virtual = 541802
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:28 ; elapsed = 00:00:30 . Memory (MB): peak = 4032.789 ; gain = 779.859 ; free physical = 84835 ; free virtual = 541802
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:28 ; elapsed = 00:00:30 . Memory (MB): peak = 4032.789 ; gain = 779.859 ; free physical = 84835 ; free virtual = 541802
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++-+--------------+----------+
+| |BlackBox name |Instances |
++-+--------------+----------+
++-+--------------+----------+
+
+Report Cell Usage: 
++------+-----------+------+
+|      |Cell       |Count |
++------+-----------+------+
+|1     |BUFG       |     4|
+|2     |MMCME4_ADV |     1|
++------+-----------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:28 ; elapsed = 00:00:30 . Memory (MB): peak = 4032.789 ; gain = 779.859 ; free physical = 84835 ; free virtual = 541802
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 1 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:22 ; elapsed = 00:00:24 . Memory (MB): peak = 4032.789 ; gain = 669.266 ; free physical = 84864 ; free virtual = 541831
+Synthesis Optimization Complete : Time (s): cpu = 00:00:28 ; elapsed = 00:00:30 . Memory (MB): peak = 4032.797 ; gain = 779.859 ; free physical = 84864 ; free virtual = 541831
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 4032.797 ; gain = 0.000 ; free physical = 84857 ; free virtual = 541825
+INFO: [Netlist 29-17] Analyzing 5 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+INFO: [Opt 31-326] The CLKFBOUT to CLKFBIN net for instance inst/mmcme4_adv_inst with COMPENSATION=INTERNAL is optimized away to aid design routability
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 4109.945 ; gain = 0.000 ; free physical = 84877 ; free virtual = 541845
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 4 instances were transformed.
+  BUFG => BUFGCE: 4 instances
+
+Synth Design complete, checksum: ef0ba473
+INFO: [Common 17-83] Releasing license: Synthesis
+28 Infos, 1 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:40 ; elapsed = 00:00:40 . Memory (MB): peak = 4109.945 ; gain = 985.008 ; free physical = 85086 ; free virtual = 542053
+INFO: [Common 17-1381] The checkpoint '/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.runs/clkwiz_synth_1/clkwiz.dcp' has been generated.
+INFO: [Coretcl 2-1648] Added synthesis output to IP cache for IP clkwiz, cache-ID = ffc65d1f38302c3d
+INFO: [Common 17-1381] The checkpoint '/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.clkwiz/clkwiz.runs/clkwiz_synth_1/clkwiz.dcp' has been generated.
+INFO: [runtcl-4] Executing : report_utilization -file clkwiz_utilization_synth.rpt -pb clkwiz_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Wed Mar 18 14:58:05 2026...
+[Wed Mar 18 14:58:16 2026] clkwiz_synth_1 finished
+wait_on_runs: Time (s): cpu = 00:00:55 ; elapsed = 00:01:07 . Memory (MB): peak = 3333.625 ; gain = 0.000 ; free physical = 87334 ; free virtual = 544299
+# file delete -force ${project_root}/out.xci
+# file link -symbolic ${project_root}/out.xci $xci
+INFO: [Common 17-206] Exiting Vivado at Wed Mar 18 14:58:16 2026...
+mkdir -p /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.vio/
+cd /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.vio/ && vitis-2022.1 vivado -mode batch -log ../vcu118.vio.log -jou ../vcu118.vio.jou -source /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/scripts/impl_ip.tcl -tclargs vcu118 vio
+Detected setup: [rhel8.8i]
+
+****** Vivado v2022.1 (64-bit)
+  **** SW Build 3526262 on Mon Apr 18 15:47:01 MDT 2022
+  **** IP Build 3524634 on Mon Apr 18 20:55:01 MDT 2022
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+source /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/scripts/impl_ip.tcl
+# set xilinx_root [file dirname [file dirname [file normalize [info script]]]]
+# source ${xilinx_root}/scripts/common.tcl
+## set bpart(genesys2) "digilentinc.com:genesys2:part0:1.1"
+## set fpart(genesys2) "xc7k325tffg900-2"
+## set hwdev(genesys2) "xc7k325t_0"
+## set cfgmp(genesys2) "s25fl256sxxxxxx0-spi-x1_x2_x4"
+## set bpart(vcu128) "xilinx.com:vcu128:part0:1.0"
+## set fpart(vcu128) "xcvu37p-fsvh2892-2L-e"
+## set hwdev(vcu128) "xcvu37p_0"
+## set cfgmp(vcu128) "mt25qu02g-spi-x1_x2_x4"
+## set bpart(vcu118) "xilinx.com:vcu118:part0:2.4"
+## set fpart(vcu118) "xcvu9p-flga2104-2L-e"
+## set hwdev(vcu118) "xcvu9p_0"
+## set cfgmp(vcu118) "mt25qu01g-spi-x1_x2_x4"
+## proc init_impl {xilinx_root argc argv} {
+##     global fpart
+##     global bpart
+##     # We declare these variables into the global context
+##     global num_threads
+##     global num_jobs
+##     global project_root
+##     global board
+##     global proj
+##     # Check argument count
+##     if { $argc < 2 } {
+##         puts "Error: Insufficient implementation arguments (${argc}): ${argv}."
+##         return -code error
+##     }
+##     # Configure parallelism
+##     set num_threads 8
+##     set num_jobs 8
+##     # Get arguments
+##     set board [lindex $argv 0]
+##     set proj [lindex $argv 1]
+##     # Set up multithreading
+##     set_param general.maxThreads $num_threads
+##     # Remove prior build
+##     set project_root ${xilinx_root}/build/${board}.${proj}
+##     file delete -force [glob -nocomplain ${project_root}/*]
+##     # Create project
+##     create_project $proj $project_root -force -part $fpart($board)
+##     set_property board_part $bpart($board) [current_project]
+## }
+## proc open_target {xilinx_root argc argv suffix} {
+##     global hwdev
+##     # We declare these variables into the global context
+##     global project_root
+##     global board
+##     global hw_tgt
+##     global hw_device
+##     # Check argument count
+##     if { $argc < 3 } {
+##         puts "Error: Insufficient target arguments (${argc}): ${argv}."
+##         return -code error
+##     }
+##     # Get arguments
+##     set url [lindex $argv 0]
+##     set path [lindex $argv 1]
+##     set board [lindex $argv 2]
+##     # Remove prior build
+##     set project_root ${xilinx_root}/build/${board}.${suffix}
+##     file delete -force [glob -nocomplain ${project_root}/*]
+##     # Connect to HW server
+##     open_hw_manager
+##     connect_hw_server -url $url
+##     # Open HW target, set JTAG frequency
+##     set hw_tgts [get_hw_targets ${url}/${path}]
+##     # From all matching targets, choose last (most specific) one
+##     set hw_tgt [lindex ${hw_tgts} [expr { [llength ${hw_tgts}] - 1 }]]
+##     open_hw_target $hw_tgt
+##     set_property PARAM.FREQUENCY 15000000 $hw_tgt
+##     # Get hardware device
+##     set hw_device [get_hw_devices $hwdev($board)]
+## }
+## proc no_cfg_exit {proj board} {
+##     puts "Error: Unsupported board ${board} for ${proj}."
+##     return -code error
+## }
+## proc gen_reports {rptdir} {
+##     file delete -force $rptdir
+##     file mkdir ${rptdir}
+##     # tclint-disable spacing, line-length
+##     check_timing             -file ${rptdir}/check_timing.rpt       -verbose
+##     report_timing            -file ${rptdir}/timing_worst_100.rpt   -max_paths 100 -nworst 100 -delay_type max -sort_by slack
+##     report_timing            -file ${rptdir}/timing_worst.rpt       -nworst 1 -delay_type max -sort_by group
+##     report_utilization       -file ${rptdir}/utilization.rpt        -hierarchical
+##     report_cdc               -file ${rptdir}/cdc.rpt
+##     report_clock_interaction -file ${rptdir}/clock_interaction.rpt
+##     report_timing_summary    -file ${rptdir}/timing_summary.rpt
+##     # tclint-enable spacing, line-length
+## }
+## proc insert_ilas {clk_net_name} {
+##     global project_root
+##     # Get nets to debug
+##     set debug_nets [lsort -dictionary [get_nets -hier -filter {MARK_DEBUG == 1}]]
+##     # Create debug core only if there are probes
+##     if { ![llength $debug_nets] } { return }
+##     # Create and configure debug core
+##     create_debug_core i_ila ila
+##     set_property -dict [list \
+##         ALL_PROBE_SAME_MU {true} ALL_PROBE_SAME_MU_CNT {4} C_ADV_TRIGGER {true} \
+##         C_DATA_DEPTH {16384} C_EN_STRG_QUAL {true} C_INPUT_PIPE_STAGES {0} \
+##         C_TRIGIN_EN {false} C_TRIGOUT_EN {false} \
+##         ] [get_debug_cores i_ila]
+##     # Connect SoC clock
+##     set_property port_width 1 [get_debug_ports i_ila/clk]
+##     connect_debug_port i_ila/clk [get_nets $clk_net_name]
+##     # Loop through debug nets (add extra list element to ensure last net is processed)
+##     set net_name_last ""
+##     set i 0
+##     foreach net [concat $debug_nets {""}] {
+##         # Remove trailing array index
+##         regsub {\[[0-9]*\]$} $net {} net_name
+##         # Create probe after all signals with the same name have been collected
+##         if { $net_name_last != $net_name } {
+##             if { $net_name_last != "" } {
+##                 puts "Creating probe $i of width [llength $sig_list] for `$net_name_last`."
+##                 # probe0 already exists, and does not need to be created
+##                 if { $i != 0 } { create_debug_port i_ila probe }
+##                 set_property port_width [llength $sig_list] [get_debug_ports i_ila/probe$i]
+##                 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports i_ila/probe$i]
+##                 connect_debug_port i_ila/probe$i [get_nets $sig_list]
+##                 incr i
+##             }
+##             set sig_list ""
+##         }
+##         lappend sig_list $net
+##         set net_name_last $net_name
+##     }
+##     # Save constraints, then implement the debug core
+##     save_constraints -force
+##     implement_debug_core
+## }
+# init_impl $xilinx_root $argc $argv
+create_project: Time (s): cpu = 00:00:05 ; elapsed = 00:00:05 . Memory (MB): peak = 3103.156 ; gain = 2.016 ; free physical = 88372 ; free virtual = 545342
+# switch $proj {
+# 
+#     clkwiz {
+#         create_ip -name clk_wiz -vendor xilinx.com -library ip -version 6.0 -module_name $proj
+#         switch $board {
+#             genesys2 {
+#                 set_property -dict [list \
+#                     CONFIG.PRIM_SOURCE {No_buffer} \
+#                     CONFIG.PRIM_IN_FREQ {200.000} \
+#                     CONFIG.CLKOUT1_USED {true} \
+#                     CONFIG.CLKOUT2_USED {true} \
+#                     CONFIG.CLKOUT3_USED {true} \
+#                     CONFIG.CLKOUT4_USED {true} \
+#                     CONFIG.CLK_OUT1_PORT {clk_50} \
+#                     CONFIG.CLK_OUT2_PORT {clk_48} \
+#                     CONFIG.CLK_OUT3_PORT {clk_20} \
+#                     CONFIG.CLK_OUT4_PORT {clk_10} \
+#                     CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {50.000} \
+#                     CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {48.000} \
+#                     CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {20.000} \
+#                     CONFIG.CLKOUT4_REQUESTED_OUT_FREQ {10.000} \
+#                     CONFIG.CLKIN1_JITTER_PS {50.0} \
+#                     CONFIG.MMCM_CLKFBOUT_MULT_F {6.000} \
+#                     CONFIG.MMCM_CLKIN1_PERIOD {5.000} \
+#                     CONFIG.MMCM_CLKOUT1_DIVIDE {24} \
+#                     CONFIG.MMCM_CLKOUT2_DIVIDE {25} \
+#                     CONFIG.MMCM_CLKOUT3_DIVIDE {60} \
+#                     CONFIG.MMCM_CLKOUT4_DIVIDE {120} \
+#                     CONFIG.NUM_OUT_CLKS {4} \
+#                     CONFIG.CLKOUT1_JITTER {112.316} \
+#                     CONFIG.CLKOUT1_PHASE_ERROR {89.971} \
+#                     CONFIG.CLKOUT2_JITTER {129.198} \
+#                     CONFIG.CLKOUT2_PHASE_ERROR {89.971} \
+#                     CONFIG.CLKOUT3_JITTER {155.330} \
+#                     CONFIG.CLKOUT3_PHASE_ERROR {89.971} \
+#                     CONFIG.CLKOUT4_JITTER {178.053} \
+#                     CONFIG.CLKOUT4_PHASE_ERROR {89.971} \
+#                     ] [get_ips $proj]
+#             }
+#             vcu128 {
+#                 set_property -dict [list \
+#                     CONFIG.CLK_IN1_BOARD_INTERFACE {Custom} \
+#                     CONFIG.RESET_BOARD_INTERFACE {Custom} \
+#                     CONFIG.USE_RESET {true} \
+#                     CONFIG.PRIM_SOURCE {No_buffer} \
+#                     CONFIG.PRIM_IN_FREQ {100.000} \
+#                     CONFIG.CLKOUT1_USED {true} \
+#                     CONFIG.CLKOUT2_USED {true} \
+#                     CONFIG.CLKOUT3_USED {true} \
+#                     CONFIG.CLKOUT4_USED {true} \
+#                     CONFIG.CLK_OUT1_PORT {clk_50} \
+#                     CONFIG.CLK_OUT2_PORT {clk_48} \
+#                     CONFIG.CLK_OUT3_PORT {clk_20} \
+#                     CONFIG.CLK_OUT4_PORT {clk_10} \
+#                     CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {50.000} \
+#                     CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {48.000} \
+#                     CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {20.000} \
+#                     CONFIG.CLKOUT4_REQUESTED_OUT_FREQ {10.000} \
+#                     CONFIG.MMCM_CLKFBOUT_MULT_F {12.000} \
+#                     CONFIG.MMCM_CLKIN1_PERIOD {5.000} \
+#                     CONFIG.MMCM_CLKOUT1_DIVIDE {24} \
+#                     CONFIG.MMCM_CLKOUT2_DIVIDE {25} \
+#                     CONFIG.MMCM_CLKOUT3_DIVIDE {60} \
+#                     CONFIG.MMCM_CLKOUT4_DIVIDE {120} \
+#                     CONFIG.NUM_OUT_CLKS {4} \
+#                     CONFIG.CLKOUT1_JITTER {112.316} \
+#                     CONFIG.CLKOUT1_PHASE_ERROR {89.971} \
+#                     CONFIG.CLKOUT2_JITTER {129.198} \
+#                     CONFIG.CLKOUT2_PHASE_ERROR {89.971} \
+#                     CONFIG.CLKOUT3_JITTER {155.330} \
+#                     CONFIG.CLKOUT3_PHASE_ERROR {89.971} \
+#                     CONFIG.CLKOUT4_JITTER {178.053} \
+#                     CONFIG.CLKOUT4_PHASE_ERROR {89.971} \
+#                     ] [get_ips $proj]
+#             }
+#             vcu118 {
+#                 set_property -dict [list \
+#                     CONFIG.CLK_IN1_BOARD_INTERFACE {Custom} \
+#                     CONFIG.RESET_BOARD_INTERFACE {Custom} \
+#                     CONFIG.USE_RESET {true} \
+#                     CONFIG.PRIM_SOURCE {No_buffer} \
+#                     CONFIG.PRIM_IN_FREQ {250.000} \
+#                     CONFIG.CLKOUT1_USED {true} \
+#                     CONFIG.CLKOUT2_USED {true} \
+#                     CONFIG.CLKOUT3_USED {true} \
+#                     CONFIG.CLKOUT4_USED {true} \
+#                     CONFIG.CLK_OUT1_PORT {clk_50} \
+#                     CONFIG.CLK_OUT2_PORT {clk_48} \
+#                     CONFIG.CLK_OUT3_PORT {clk_20} \
+#                     CONFIG.CLK_OUT4_PORT {clk_10} \
+#                     CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {50.000} \
+#                     CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {48.000} \
+#                     CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {20.000} \
+#                     CONFIG.CLKOUT4_REQUESTED_OUT_FREQ {10.000} \
+#                     CONFIG.MMCM_CLKFBOUT_MULT_F {24.000} \
+#                     CONFIG.MMCM_CLKIN1_PERIOD {4.000} \
+#                     CONFIG.MMCM_CLKOUT0_DIVIDE_F {24.000} \
+#                     CONFIG.MMCM_CLKOUT1_DIVIDE {25} \
+#                     CONFIG.MMCM_CLKOUT2_DIVIDE {60} \
+#                     CONFIG.MMCM_CLKOUT3_DIVIDE {120} \
+#                     CONFIG.MMCM_CLKOUT4_DIVIDE {1} \
+#                     CONFIG.NUM_OUT_CLKS {4} \
+#                     CONFIG.CLKOUT1_JITTER {153.164} \
+#                     CONFIG.CLKOUT1_PHASE_ERROR {154.678} \
+#                     CONFIG.CLKOUT2_JITTER {154.376} \
+#                     CONFIG.CLKOUT2_PHASE_ERROR {154.678} \
+#                     CONFIG.CLKOUT3_JITTER {184.746} \
+#                     CONFIG.CLKOUT3_PHASE_ERROR {154.678} \
+#                     CONFIG.CLKOUT4_JITTER {213.887} \
+#                     CONFIG.CLKOUT4_PHASE_ERROR {154.678} \
+#                     ] [get_ips $proj]
+#             }
+#             default { nocfgexit $proj $board }
+#         }
+#     }
+# 
+#     vio {
+#         create_ip -name vio -vendor xilinx.com -library ip -version 3.0 -module_name $proj
+#         switch $board {
+#             genesys2 {
+#                 set_property -dict [list \
+#                     CONFIG.C_NUM_PROBE_OUT {3} \
+#                     CONFIG.C_PROBE_OUT0_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT1_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT2_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT1_WIDTH {2} \
+#                     CONFIG.C_EN_PROBE_IN_ACTIVITY {0} \
+#                     CONFIG.C_NUM_PROBE_IN {0} \
+#                     ] [get_ips $proj]
+#             }
+#             vcu118 {
+#                 set_property -dict [list \
+#                     CONFIG.C_NUM_PROBE_OUT {6} \
+#                     CONFIG.C_PROBE_OUT0_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT1_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT2_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT3_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT4_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT5_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT1_WIDTH {0} \
+#                     CONFIG.C_PROBE_OUT5_WIDTH {32} \
+#                     CONFIG.C_EN_PROBE_IN_ACTIVITY {0} \
+#                     CONFIG.C_NUM_PROBE_IN {0} \
+#                     ] [get_ips $proj]
+#             }
+#             vcu128 {
+#                 set_property -dict [list \
+#                     CONFIG.C_NUM_PROBE_OUT {3} \
+#                     CONFIG.C_PROBE_OUT0_INIT_VAL {0x0} \
+#                     CONFIG.C_PROBE_OUT1_INIT_VAL {0x2} \
+#                     CONFIG.C_PROBE_OUT2_INIT_VAL {0x1} \
+#                     CONFIG.C_PROBE_OUT1_WIDTH {2} \
+#                     CONFIG.C_EN_PROBE_IN_ACTIVITY {0} \
+#                     CONFIG.C_NUM_PROBE_IN {0} \
+#                     ] [get_ips $proj]
+#             }
+#             default { nocfgexit $proj $board }
+#         }
+#     }
+# 
+#     mig7s {
+#         create_ip -name mig_7series -vendor xilinx.com -library ip -module_name $proj
+#         # Inject existing project file
+#         file copy ${xilinx_root}/src/ips/${board}.${proj}.prj \
+#             ${project_root}/${proj}.srcs/sources_1/ip/${proj}/mig_a.prj
+#         switch $board {
+#             genesys2 {
+#                 set_property -dict [list \
+#                     CONFIG.XML_INPUT_FILE {mig_a.prj} \
+#                     CONFIG.RESET_BOARD_INTERFACE {Custom} \
+#                     CONFIG.MIG_DONT_TOUCH_PARAM {Custom} \
+#                     CONFIG.BOARD_MIG_PARAM {Custom} \
+#                     ] [get_ips $proj]
+#             }
+#             default { nocfgexit $proj $board }
+#         }
+#     }
+# 
+#     ddr4 {
+#         create_ip -name ddr4 -vendor xilinx.com -library ip -version 2.2 -module_name $proj
+#         switch $board {
+#             vcu128 {
+#                 set_property -dict [list \
+#                     CONFIG.C0.DDR4_Clamshell {true} \
+#                     CONFIG.C0_DDR4_BOARD_INTERFACE {ddr4_sdram} \
+#                     CONFIG.System_Clock {No_Buffer} \
+#                     CONFIG.Reference_Clock {No_Buffer} \
+#                     CONFIG.C0.DDR4_InputClockPeriod {10000} \
+#                     CONFIG.C0.DDR4_CLKOUT0_DIVIDE {3} \
+#                     CONFIG.C0.DDR4_MemoryPart {MT40A512M16HA-075E} \
+#                     CONFIG.C0.DDR4_DataWidth {72} \
+#                     CONFIG.C0.DDR4_DataMask {NO_DM_NO_DBI} \
+#                     CONFIG.C0.DDR4_Ecc {true} \
+#                     CONFIG.C0.DDR4_AxiDataWidth {512} \
+#                     CONFIG.C0.DDR4_AxiAddressWidth {32} \
+#                     CONFIG.C0.DDR4_AxiIDWidth {8} \
+#                     CONFIG.ADDN_UI_CLKOUT1_FREQ_HZ {100} \
+#                     CONFIG.C0.BANK_GROUP_WIDTH {1} \
+#                     CONFIG.C0.CS_WIDTH {2} \
+#                     CONFIG.C0.DDR4_AxiSelection {true} \
+#                     ] [get_ips $proj]
+#             }
+#             vcu118 {
+#                 set_property -dict [list \
+#                     CONFIG.System_Clock {No_Buffer} \
+#                     CONFIG.Reference_Clock {No_Buffer} \
+#                     CONFIG.C0_DDR4_BOARD_INTERFACE {ddr4_sdram_c1_062} \
+#                     CONFIG.C0.DDR4_InputClockPeriod {4000} \
+#                     CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5} \
+#                     CONFIG.C0.DDR4_MemoryPart {MT40A256M16LY-062E} \
+#                     CONFIG.C0.DDR4_TimePeriod {833} \
+#                     CONFIG.C0.DDR4_DataWidth {64} \
+#                     CONFIG.C0.DDR4_DataMask {DM_NO_DBI} \
+#                     CONFIG.C0.DDR4_MCS_ECC {false} \
+#                     CONFIG.C0.DDR4_CasWriteLatency {12} \
+#                     CONFIG.C0.DDR4_CasLatency {18} \
+#                     CONFIG.C0.DDR4_AxiDataWidth {512} \
+#                     CONFIG.C0.DDR4_AxiAddressWidth {31} \
+#                     CONFIG.C0.DDR4_AxiIDWidth {8} \
+#                     CONFIG.C0.BANK_GROUP_WIDTH {1} \
+#                     CONFIG.C0.DDR4_AxiSelection {true} \
+#                     ] [get_ips $proj]
+#             }
+#             default { nocfgexit $proj $board }
+#         }
+#     }
+# 
+# }
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/usr/pack/vitis-2022.1-zr/Vivado/2022.1/data/ip'.
+ERROR: [IP_Flow 19-3458] Validation failed for parameter 'PROBE OUT1 WIDTH(C_PROBE_OUT1_WIDTH)' for IP 'vio'. Value '0' is out of the range (1,256)
+INFO: [IP_Flow 19-3438] Customization errors found on 'vio'. Restoring to previous valid configuration.
+INFO: [Common 17-17] undo 'set_property'
+ERROR: [Common 17-39] 'set_property' failed due to earlier errors.
+
+    while executing
+"rdi::add_properties -dict {CONFIG.C_NUM_PROBE_OUT 6 CONFIG.C_PROBE_OUT0_INIT_VAL 0x0 CONFIG.C_PROBE_OUT1_INIT_VAL 0x0 CONFIG.C_PROBE_OUT2_INIT_VAL 0x0..."
+    invoked from within
+"set_property -dict [list  CONFIG.C_NUM_PROBE_OUT {6}  CONFIG.C_PROBE_OUT0_INIT_VAL {0x0}  CONFIG.C_PROBE_OUT1_INIT_VAL {0x0}  CONFIG.C_PROBE_OUT2_INIT..."
+    ("vcu118" arm line 2)
+    invoked from within
+"switch $board {
+            genesys2 {
+                set_property -dict [list  CONFIG.C_NUM_PROBE_OUT {3}  CONFIG.C_PROBE_OUT0_INIT_VAL {0x0}  CONFI..."
+    ("vio" arm line 3)
+    invoked from within
+"switch $proj {
+
+    clkwiz {
+        create_ip -name clk_wiz -vendor xilinx.com -library ip -version 6.0 -module_name $proj
+        switch $board {
+  ..."
+    (file "/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/scripts/impl_ip.tcl" line 16)
+INFO: [Common 17-206] Exiting Vivado at Wed Mar 18 14:58:41 2026...
+make: *** [/scratch2/nsalamini/github_new_new/cheshire/target/xilinx/xilinx.mk:44: /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/build/vcu118.vio/out.xci] Error 1
+rm /scratch2/nsalamini/github_new_new/cheshire/target/xilinx/scripts/add_sources.vcu118.tcl
