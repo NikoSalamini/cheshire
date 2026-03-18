@@ -163,6 +163,9 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
   `ifdef USE_LLC_PARTITIONING
     ret.LlcCachePartition = 1;
   `endif
+  `ifdef USE_APB_TIMER
+    ret.ApbTimer = 1;
+  `endif
     return ret;
   endfunction
 
@@ -225,17 +228,25 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
   logic [1:0] boot_mode, vio_boot_mode;
   logic       sys_rst;
 
+  // atg vios
+  logic       ext_start,  vio_ext_start;
+  logic       ext_stop,   vio_ext_stop;
+
 `ifdef USE_VIO
   vio i_vio (
     .clk        ( soc_clk ),
     .probe_out0 ( vio_reset         ),
     .probe_out1 ( vio_boot_mode     ),
-    .probe_out2 ( vio_boot_mode_sel )
+    .probe_out2 ( vio_boot_mode_sel ),
+    .probe_out3 ( vio_ext_start     ),
+    .probe_out4 ( vio_ext_stop      )
   );
 `else
   assign vio_reset          = '0;
   assign vio_boot_mode      = '0;
   assign vio_boot_mode_sel  = '0;
+  assign vio_ext_start      = '0;
+  assign vio_ext_stop       = '0;
 `endif
 
 `ifdef USE_RESET
@@ -243,7 +254,9 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
 `elsif USE_RESETN
   assign sys_rst = ~sys_resetn | vio_reset;
 `endif
-  assign boot_mode = vio_boot_mode_sel ? vio_boot_mode : boot_mode_i;
+  assign boot_mode  = vio_boot_mode_sel ? vio_boot_mode : boot_mode_i;
+  assign ext_start  = vio_ext_start;
+  assign ext_stop   = vio_ext_stop;
 
   //////////////////
   //  Reset Sync  //
@@ -655,6 +668,8 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
     .axi_ext_mst_rsp_o  ( ),
     .axi_ext_slv_req_o  ( ),
     .axi_ext_slv_rsp_i  ( '0 ),
+    .ext_start          ( ext_start ),  // atg
+    .ext_stop           ( ext_stop  ),
 `ifdef USE_CFG_REGS
     .reg_ext_slv_req_o  ( cfg_reg_req ),
     .reg_ext_slv_rsp_i  ( cfg_reg_rsp ),

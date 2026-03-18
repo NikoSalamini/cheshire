@@ -105,9 +105,13 @@ module cheshire_soc import cheshire_pkg::*; #(
   output logic [UsbNumPorts-1:0] usb_dm_oe_o,
   input  logic [UsbNumPorts-1:0] usb_dp_i,
   output logic [UsbNumPorts-1:0] usb_dp_o,
-  output logic [UsbNumPorts-1:0] usb_dp_oe_o
+  output logic [UsbNumPorts-1:0] usb_dp_oe_o,
+  // ATG pulse signals
+  input ext_start,
+  input ext_stop
 );
 
+  `include "apb/typedef.svh"
   `include "axi/typedef.svh"
   `include "common_cells/registers.svh"
   `include "common_cells/assertions.svh"
@@ -240,10 +244,7 @@ module cheshire_soc import cheshire_pkg::*; #(
     UniqueIds:          0,
     AxiAddrWidth:       Cfg.AddrWidth,
     AxiDataWidth:       Cfg.AxiDataWidth,
-    NoAddrRules:        AxiOut.num_rules,
-    // Setting a `default` here allows for custom XBars with extended configs outside Cheshire.
-    // Importantly, this requires that '0 *disables* any and all such custom extensions.
-    default: '0
+    NoAddrRules:        AxiOut.num_rules
   };
 
   axi_xbar #(
@@ -1049,6 +1050,7 @@ module cheshire_soc import cheshire_pkg::*; #(
       gpio        : Cfg.Gpio,
       spi_host    : Cfg.SpiHost,
       dma         : Cfg.Dma,
+      // atg         : Cfg.Atg, // TODO: register address space
       serial_link : Cfg.SerialLink,
       vga         : Cfg.Vga,
       usb         : Cfg.Usb,
@@ -1549,6 +1551,68 @@ module cheshire_soc import cheshire_pkg::*; #(
     assign intr.intn.bus_err.dma = '0;
   end
 
+  ///////////
+  //  ATG  //
+  ///////////
+  if (Cfg.Atg) begin : gen_atg
+
+    // TODO: atg (default user assignment). Is this used for tagging?
+    axi_mst_req_t axi_atg_req; 
+
+    always_comb begin
+      axi_in_req[AxiIn.atg]         = axi_atg_req;
+      axi_in_req[AxiIn.atg].aw.user = Cfg.AxiUserDefault; 
+      axi_in_req[AxiIn.atg].w.user  = Cfg.AxiUserDefault;
+      axi_in_req[AxiIn.atg].ar.user = Cfg.AxiUserDefault;
+    end
+
+    // ATG signals (no slave ports)
+    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_mst_req_t axi_atg_req_precut; 
+    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_mst_rsp_t axi_atg_rsp_precut;
+
+    // ATG Wrapper
+    cheshire_atg_wrap #(
+      .MaxReadTxns      (),
+      .MaxWriteTxns     (),
+      .NumBurstBeats    (32'd256),
+      .AddrWidth        ( Cfg.AddrWidth     ),
+      .DataWidth        ( Cfg.AxiDataWidth  ),
+      .IdWidth          ( Cfg.AxiMstIdWidth ),
+      .UserWidth        ( Cfg.AxiUserWidth  ),
+      .axi_mst_req_t    ( axi_mst_req_t     ), // TODO: check that this type is ok for the 
+      .axi_mst_rsp_t    ( axi_mst_rsp_t     )
+    ) i_atg (
+      .clk_i,
+      .rst_ni,
+      .axi_mst_req_o  ( axi_atg_req_precut ),
+      .axi_mst_rsp_i  ( axi_atg_rsp_precut ),
+      .ext_start,                             // HW VIOs
+      .ext_stop
+    );
+
+    // AXI Cut
+    axi_cut #(
+      .Bypass     ( ~Cfg.AtgPostCut   ),  // TODO: What is PostCut?
+      .aw_chan_t  ( axi_mst_aw_chan_t ),
+      .w_chan_t   ( axi_mst_w_chan_t  ),
+      .b_chan_t   ( axi_mst_b_chan_t  ),
+      .ar_chan_t  ( axi_mst_ar_chan_t ),
+      .r_chan_t   ( axi_mst_r_chan_t  ),
+      .axi_req_t  ( axi_mst_req_t ),
+      .axi_resp_t ( axi_mst_rsp_t )
+    ) i_atg_axi_rt_cut (
+      .clk_i,
+      .rst_ni,
+      .slv_req_i  ( axi_atg_req_precut    ),
+      .slv_resp_o ( axi_atg_rsp_precut    ),
+      .mst_req_o  ( axi_atg_req           ),
+      .mst_resp_i ( axi_in_rsp[AxiIn.atg] )
+    );
+
+    // TODO missing bus err
+
+  end
+
   ///////////////////
   //  Serial Link  //
   ///////////////////
@@ -1782,6 +1846,55 @@ module cheshire_soc import cheshire_pkg::*; #(
     assign usb_dp_oe_o = '0;
 
     assign intr.intn.usb = 0;
+
+  end
+
+  /////////////////
+  //  APB Timer  //
+  /////////////////
+
+  `APB_TYPEDEF_REQ_T(timer_apb_req_t, logic [Cfg.AddrWidth-1:0], logic [31:0], logic [3:0])
+  `APB_TYPEDEF_RESP_T(timer_apb_rsp_t, logic [31:0])
+
+  if (Cfg.ApbTimer) begin : gen_apb_timer
+
+    timer_apb_req_t timer_apb_req;
+    timer_apb_rsp_t timer_apb_rsp;
+
+    reg_to_apb #(
+      .reg_req_t  ( reg_req_t       ),
+      .reg_rsp_t  ( reg_rsp_t       ),
+      .apb_req_t  ( timer_apb_req_t ),
+      .apb_rsp_t  ( timer_apb_rsp_t )
+    ) i_reg_to_apb_timer (
+      .clk_i,
+      .rst_ni,
+      .reg_req_i  ( reg_out_req[RegOut.apb_timer] ),
+      .reg_rsp_o  ( reg_out_rsp[RegOut.apb_timer] ),
+      .apb_req_o  ( timer_apb_req                 ),
+      .apb_rsp_i  ( timer_apb_rsp                 )
+    );
+
+    apb_timer #(
+      .APB_ADDR_WIDTH ( Cfg.AddrWidth ),
+      .TIMER_CNT      ( 2             ) // Number of timers instantiated
+    ) i_apb_timer (
+      .HCLK    ( clk_i                 ),
+      .HRESETn ( rst_ni                ),
+      .PSEL    ( timer_apb_req.psel    ),
+      .PENABLE ( timer_apb_req.penable ),
+      .PWRITE  ( timer_apb_req.pwrite  ),
+      .PADDR   ( timer_apb_req.paddr   ),
+      .PWDATA  ( timer_apb_req.pwdata  ),
+      .PRDATA  ( timer_apb_rsp.prdata  ),
+      .PREADY  ( timer_apb_rsp.pready  ),
+      .PSLVERR ( timer_apb_rsp.pslverr ),
+      .irq_o   ( intr.intn.apb_timer   )
+    );
+
+  end else begin : gen_no_apb_timer
+
+    assign intr.intn.apb_timer = '0;
 
   end
 
