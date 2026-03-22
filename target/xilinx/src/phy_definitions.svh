@@ -14,6 +14,8 @@
   `define USE_STARTUPE3
   `define USE_VIO
   `define USE_CHESHIRE_RT
+  `define USE_RAM_DELAY
+  `define USE_CFG_REGS
 `endif
 
 `ifdef TARGET_VCU128
