@@ -1578,9 +1578,9 @@ module cheshire_soc import cheshire_pkg::*; #(
       .MaxReadTxns      (),
       .MaxWriteTxns     (),
       .NumLines         (Cfg.LlcNumLines),
-      .SetAssociativity (Cfg.LlcSetAssoc),
+      .SetAssociativity (256), // modify this with the # ways per set
       .NumBlocks        (Cfg.LlcNumBlocks),
-      .NumBurstBeats    (32'd1),
+      .NumBurstBeats    (32'd1), 
       .AddrWidth        ( Cfg.AddrWidth     ),
       .DataWidth        ( Cfg.AxiDataWidth  ),
       .IdWidth          ( Cfg.AxiMstIdWidth ),

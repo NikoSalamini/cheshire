@@ -21,7 +21,7 @@ module axi_traffic_generator #(
   /// NumLines
   parameter int unsigned NumLines			      = 32'd256,
   /// Number of ways of the LLC
-  parameter int unsigned SetAssociativity	  = 32'd8,
+  parameter int unsigned SetAssociativity	  = 32'd8, // actually this represents the total number of sets and not the number of ways in a set
   /// Block Width   
   parameter int unsigned NumBlocks          = 32'd8,
   // AXI Bus Types
