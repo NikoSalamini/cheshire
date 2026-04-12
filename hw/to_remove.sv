@@ -105,13 +105,10 @@ module cheshire_soc import cheshire_pkg::*; #(
   output logic [UsbNumPorts-1:0] usb_dm_oe_o,
   input  logic [UsbNumPorts-1:0] usb_dp_i,
   output logic [UsbNumPorts-1:0] usb_dp_o,
-  output logic [UsbNumPorts-1:0] usb_dp_oe_o,
-  // ATG pulse signals
-  input ext_start,
-  input ext_stop,
-  input logic [Cfg.AddrWidth-1:0] start_address_i
+  output logic [UsbNumPorts-1:0] usb_dp_oe_o
 );
 
+  `include "apb/typedef.svh"
   `include "axi/typedef.svh"
   `include "common_cells/registers.svh"
   `include "common_cells/assertions.svh"
@@ -244,10 +241,7 @@ module cheshire_soc import cheshire_pkg::*; #(
     UniqueIds:          0,
     AxiAddrWidth:       Cfg.AddrWidth,
     AxiDataWidth:       Cfg.AxiDataWidth,
-    NoAddrRules:        AxiOut.num_rules,
-    // Setting a `default` here allows for custom XBars with extended configs outside Cheshire.
-    // Importantly, this requires that '0 *disables* any and all such custom extensions.
-    default: '0
+    NoAddrRules:        AxiOut.num_rules
   };
 
   axi_xbar #(
@@ -449,16 +443,6 @@ module cheshire_soc import cheshire_pkg::*; #(
   axi_slv_req_t axi_llc_cut_req;
   axi_slv_rsp_t axi_llc_cut_rsp;
 
-  /* LLC DEBUG */
-  // signals used for debugging LLC transactions
-  // tagger_req, tagger_rsp: port connected to the slave port of the llc --> Marked debug to both signals
-  // axi_llc_mst_req_o, axi_llc_mst_rsp_i: master port of the llc --> Adding new signals to be assigned to those two ports
-  (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_ext_llc_req_t axi_llc_mst_req_o_s;
-
-  // this can be directly assigned to the signal
-  (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_ext_llc_rsp_t axi_llc_mst_rsp_i_s;
-  assign axi_llc_mst_rsp_i_s = axi_llc_mst_rsp_i;
-
   if (Cfg.LlcOutConnect) begin : gen_llc_atomics
 
     axi_slv_req_t axi_llc_amo_req;
@@ -525,8 +509,8 @@ module cheshire_soc import cheshire_pkg::*; #(
       axi_llc_cut_rsp = axi_llc_remap_rsp;
     end
 
-    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_slv_req_t tagger_req; // LLC DEBUG
-    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_slv_rsp_t tagger_rsp; // LLC DEBUG
+    axi_slv_req_t tagger_req;
+    axi_slv_rsp_t tagger_rsp;
 
     if (Cfg.LlcCachePartition) begin : gen_tagger
       tagger #(
@@ -581,7 +565,7 @@ module cheshire_soc import cheshire_pkg::*; #(
       .test_i              ( test_mode_i ),
       .slv_req_i           ( tagger_req ),
       .slv_resp_o          ( tagger_rsp ),
-      .mst_req_o           ( axi_llc_mst_req_o_s ), // LLC DEBUG
+      .mst_req_o           ( axi_llc_mst_req_o ),
       .mst_resp_i          ( axi_llc_mst_rsp_i ),
       .conf_req_i          ( reg_out_req[RegOut.llc] ),
       .conf_resp_o         ( reg_out_rsp[RegOut.llc] ),
@@ -593,16 +577,14 @@ module cheshire_soc import cheshire_pkg::*; #(
 
   end else if (Cfg.LlcOutConnect) begin : gen_llc_bypass
 
-    assign axi_llc_mst_req_o_s  = axi_llc_cut_req; // LLC DEBUG
+    assign axi_llc_mst_req_o  = axi_llc_cut_req;
     assign axi_llc_cut_rsp    = axi_llc_mst_rsp_i;
 
   end else begin : gen_llc_stubout
 
-    assign axi_llc_mst_req_o_s  = '0; // LLC DEBUG 
+    assign axi_llc_mst_req_o  = '0;
 
   end
-
-  assign axi_llc_mst_req_o = axi_llc_mst_req_o_s; // LLC DEBUG
 
   /////////////
   //  Cores  //
@@ -1065,7 +1047,6 @@ module cheshire_soc import cheshire_pkg::*; #(
       gpio        : Cfg.Gpio,
       spi_host    : Cfg.SpiHost,
       dma         : Cfg.Dma,
-      // atg         : Cfg.Atg, // TODO: register address space
       serial_link : Cfg.SerialLink,
       vga         : Cfg.Vga,
       usb         : Cfg.Usb,
@@ -1566,72 +1547,6 @@ module cheshire_soc import cheshire_pkg::*; #(
     assign intr.intn.bus_err.dma = '0;
   end
 
-  ///////////
-  //  ATG  //
-  ///////////
-  if (Cfg.Atg) begin : gen_atg
-
-    // TODO: atg (default user assignment). Is this used for tagging?
-    axi_mst_req_t axi_atg_req; 
-
-    always_comb begin
-      axi_in_req[AxiIn.atg]         = axi_atg_req;
-      axi_in_req[AxiIn.atg].aw.user = Cfg.AxiUserDefault; 
-      axi_in_req[AxiIn.atg].w.user  = Cfg.AxiUserDefault;
-      axi_in_req[AxiIn.atg].ar.user = Cfg.AxiUserDefault;
-    end
-
-    // ATG signals (no slave ports)
-    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_mst_req_t axi_atg_req_precut; 
-    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_mst_rsp_t axi_atg_rsp_precut;
-
-    // ATG Wrapper
-    cheshire_atg_wrap #(
-      .MaxReadTxns      (),
-      .MaxWriteTxns     (),
-      .NumLines         (Cfg.LlcNumLines),
-      .SetAssociativity (8), // modify this with the # ways per set, which in the standard config is 8
-      .NumBlocks        (Cfg.LlcNumBlocks),
-      .NumBurstBeats    (32'd1), 
-      .AddrWidth        ( Cfg.AddrWidth     ),
-      .DataWidth        ( Cfg.AxiDataWidth  ),
-      .IdWidth          ( Cfg.AxiMstIdWidth ),
-      .UserWidth        ( Cfg.AxiUserWidth  ),
-      .axi_mst_req_t    ( axi_mst_req_t     ), 
-      .axi_mst_rsp_t    ( axi_mst_rsp_t     )
-    ) i_atg (
-      .clk_i,
-      .rst_ni,
-      .axi_mst_req_o  ( axi_atg_req_precut ),
-      .axi_mst_rsp_i  ( axi_atg_rsp_precut ),
-      .ext_start,                             // HW VIO
-      .ext_stop,                              // HW VIO
-      .start_address_i                        // HW VIO
-    );
-
-    // AXI Cut
-    axi_cut #(
-      .Bypass     ( ~Cfg.AtgPostCut   ),  // TODO: What is PostCut?
-      .aw_chan_t  ( axi_mst_aw_chan_t ),
-      .w_chan_t   ( axi_mst_w_chan_t  ),
-      .b_chan_t   ( axi_mst_b_chan_t  ),
-      .ar_chan_t  ( axi_mst_ar_chan_t ),
-      .r_chan_t   ( axi_mst_r_chan_t  ),
-      .axi_req_t  ( axi_mst_req_t ),
-      .axi_resp_t ( axi_mst_rsp_t )
-    ) i_atg_axi_rt_cut (
-      .clk_i,
-      .rst_ni,
-      .slv_req_i  ( axi_atg_req_precut    ),
-      .slv_resp_o ( axi_atg_rsp_precut    ),
-      .mst_req_o  ( axi_atg_req           ),
-      .mst_resp_i ( axi_in_rsp[AxiIn.atg] )
-    );
-
-    // TODO missing bus err
-
-  end
-
   ///////////////////
   //  Serial Link  //
   ///////////////////
@@ -1865,6 +1780,55 @@ module cheshire_soc import cheshire_pkg::*; #(
     assign usb_dp_oe_o = '0;
 
     assign intr.intn.usb = 0;
+
+  end
+
+  /////////////////
+  //  APB Timer  //
+  /////////////////
+
+  `APB_TYPEDEF_REQ_T(timer_apb_req_t, logic [Cfg.AddrWidth-1:0], logic [31:0], logic [3:0])
+  `APB_TYPEDEF_RESP_T(timer_apb_rsp_t, logic [31:0])
+
+  if (Cfg.ApbTimer) begin : gen_apb_timer
+
+    timer_apb_req_t timer_apb_req;
+    timer_apb_rsp_t timer_apb_rsp;
+
+    reg_to_apb #(
+      .reg_req_t  ( reg_req_t       ),
+      .reg_rsp_t  ( reg_rsp_t       ),
+      .apb_req_t  ( timer_apb_req_t ),
+      .apb_rsp_t  ( timer_apb_rsp_t )
+    ) i_reg_to_apb_timer (
+      .clk_i,
+      .rst_ni,
+      .reg_req_i  ( reg_out_req[RegOut.apb_timer] ),
+      .reg_rsp_o  ( reg_out_rsp[RegOut.apb_timer] ),
+      .apb_req_o  ( timer_apb_req                 ),
+      .apb_rsp_i  ( timer_apb_rsp                 )
+    );
+
+    apb_timer #(
+      .APB_ADDR_WIDTH ( Cfg.AddrWidth ),
+      .TIMER_CNT      ( 2             ) // Number of timers instantiated
+    ) i_apb_timer (
+      .HCLK    ( clk_i                 ),
+      .HRESETn ( rst_ni                ),
+      .PSEL    ( timer_apb_req.psel    ),
+      .PENABLE ( timer_apb_req.penable ),
+      .PWRITE  ( timer_apb_req.pwrite  ),
+      .PADDR   ( timer_apb_req.paddr   ),
+      .PWDATA  ( timer_apb_req.pwdata  ),
+      .PRDATA  ( timer_apb_rsp.prdata  ),
+      .PREADY  ( timer_apb_rsp.pready  ),
+      .PSLVERR ( timer_apb_rsp.pslverr ),
+      .irq_o   ( intr.intn.apb_timer   )
+    );
+
+  end else begin : gen_no_apb_timer
+
+    assign intr.intn.apb_timer = '0;
 
   end
 
