@@ -142,7 +142,10 @@ module fixture_cheshire_soc #(
     .usb_dm_oe_o        ( ),
     .usb_dp_i           ( '0 ),
     .usb_dp_o           ( ),
-    .usb_dp_oe_o        ( )
+    .usb_dp_oe_o        ( ),
+    .ext_start          ('0),
+    .ext_stop           ('0),
+    .start_address_i    ('0)
   );
 
   ////////////////////////

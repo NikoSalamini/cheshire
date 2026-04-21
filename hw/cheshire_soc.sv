@@ -525,8 +525,9 @@ module cheshire_soc import cheshire_pkg::*; #(
       axi_llc_cut_rsp = axi_llc_remap_rsp;
     end
 
-    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_slv_req_t tagger_req; // LLC DEBUG
-    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_slv_rsp_t tagger_rsp; // LLC DEBUG
+    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_slv_req_t tagger_req;      // LLC DEBUG
+    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_slv_rsp_t tagger_rsp;      // LLC DEBUG
+    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_slv_req_t tagger_req_mod;  // HARD-CODING FOR ATG
 
     if (Cfg.LlcCachePartition) begin : gen_tagger
       tagger #(
@@ -555,6 +556,17 @@ module cheshire_soc import cheshire_pkg::*; #(
       assign axi_llc_remap_rsp = tagger_rsp;
     end
 
+    /* hard-coding the user channel to 1 for transactions starting with 0xC0 for atg marking */
+    always_comb begin
+      tagger_req_mod = tagger_req;
+
+      if ((tagger_req.aw.addr[31:24] == 8'hC0) ||
+          (tagger_req.ar.addr[31:24] == 8'hC0)) begin
+        tagger_req_mod.ar.user[0] = 1'b1;
+        tagger_req_mod.aw.user[0] = 1'b1;
+      end
+    end
+
     axi_llc_reg_wrap #(
       .SetAssociativity ( Cfg.LlcSetAssoc       ),
       .NumLines         ( Cfg.LlcNumLines       ),
@@ -579,7 +591,7 @@ module cheshire_soc import cheshire_pkg::*; #(
       .clk_i,
       .rst_ni,
       .test_i              ( test_mode_i ),
-      .slv_req_i           ( tagger_req ),
+      .slv_req_i           ( tagger_req_mod ),
       .slv_resp_o          ( tagger_rsp ),
       .mst_req_o           ( axi_llc_mst_req_o_s ), // LLC DEBUG
       .mst_resp_i          ( axi_llc_mst_rsp_i ),

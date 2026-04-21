@@ -669,7 +669,7 @@ package cheshire_pkg;
     SerialLink        : 1,
     Vga               : 1,
     Usb               : 1,
-    AxiRt             : 0,
+    AxiRt             : 0, 
     Clic              : 0,
     IrqRouter         : 0,
     BusErr            : 1,
@@ -695,7 +695,7 @@ package cheshire_pkg;
     LlcOutRegionEnd   : 64'h1_0000_0000,
     LlcUserMsb        : 5,
     LlcUserLsb        : 2,
-    LlcCachePartition : 0,
+    LlcCachePartition : 1, // enabling LLCCachePartition
     LlcMaxPartition   : 16,
     LlcRemapHash      : axi_llc_pkg::Modulo,
     // VGA: RGB565

@@ -10,10 +10,10 @@
 CHS_SW_GCC_BINROOT ?= $(dir $(shell which riscv64-unknown-elf-gcc))
 CHS_SW_DTC     ?= dtc
 
-CHS_SW_AR      := $(CHS_SW_GCC_BINROOT)/riscv64-unknown-elf-ar
-CHS_SW_CC      := $(CHS_SW_GCC_BINROOT)/riscv64-unknown-elf-gcc
-CHS_SW_OBJCOPY := $(CHS_SW_GCC_BINROOT)/riscv64-unknown-elf-objcopy
-CHS_SW_OBJDUMP := $(CHS_SW_GCC_BINROOT)/riscv64-unknown-elf-objdump
+CHS_SW_AR      := riscv -riscv64-gcc-14.2.0 riscv64-unknown-elf-ar
+CHS_SW_CC      := riscv -riscv64-gcc-14.2.0 riscv64-unknown-elf-gcc
+CHS_SW_OBJCOPY := riscv -riscv64-gcc-14.2.0 riscv64-unknown-elf-objcopy
+CHS_SW_OBJDUMP := riscv -riscv64-gcc-14.2.0 riscv64-unknown-elf-objdump
 CHS_SW_LTOPLUG := $(shell find $(shell dirname $(CHS_SW_GCC_BINROOT))/libexec/gcc/riscv64-unknown-elf/**/liblto_plugin.so)
 
 CHS_SW_DIR       ?= $(CHS_ROOT)/sw
@@ -105,11 +105,17 @@ CHS_SW_GEN_HDRS += $(OTPROOT)/.generated
 define chs_sw_ld_elf_rule
 .PRECIOUS: %.$(1).elf
 
+# Generic test / single-object build
 %.$(1).elf: $$(CHS_SW_LD_DIR)/$(1).ld %.o $$(CHS_SW_LIBS)
-	$$(CHS_SW_CC) $$(CHS_SW_INCLUDES) -T$$< $$(CHS_SW_LDFLAGS) -o $$@ $$*.o $$(CHS_SW_LIBS)
+	$(CHS_SW_CC) $(CHS_SW_INCLUDES) -T$$< $(CHS_SW_LDFLAGS) \
+	-Wl,--whole-archive $(CHS_SW_LIBS) -Wl,--no-whole-archive \
+	-o $$@ $$*.o
 
+# Mode-specific object (e.g. axirt_hello.spm.o)
 %.$(1).elf: $$(CHS_SW_LD_DIR)/$(1).ld %.$(1).o $$(CHS_SW_LIBS)
-	$$(CHS_SW_CC) $$(CHS_SW_INCLUDES) -T$$< $$(CHS_SW_LDFLAGS) -o $$@ $$*.$(1).o $$(CHS_SW_LIBS)
+	$(CHS_SW_CC) $(CHS_SW_INCLUDES) -T$$< $(CHS_SW_LDFLAGS) \
+	-Wl,--whole-archive $(CHS_SW_LIBS) -Wl,--no-whole-archive \
+	-o $$@ $$*.$(1).o
 endef
 
 CHS_SW_LINK_MODES ?= $(patsubst $(CHS_SW_LD_DIR)/%.ld,%,$(wildcard $(CHS_SW_LD_DIR)/*.ld))
@@ -194,3 +200,19 @@ CHS_SW_TESTS += $(CHS_SW_TEST_ROM_DUMP:.rom.dump=.rom.memh) $(CHS_SW_TEST_ROM_DU
 
 # Add all dumps to test build
 CHS_SW_TESTS += $(CHS_SW_TEST_DUMP)
+
+.PHONY: clean distclean
+
+clean:
+	rm -f $(CHS_SW_LIB_SRCS_O)
+	rm -f $(CHS_SW_LIBS)
+	rm -f $(CHS_SW_TEST_DUMP)
+	rm -f $(CHS_SW_TESTS)
+	find $(CHS_SW_DIR) -name "*.o" -delete
+	find $(CHS_SW_DIR) -name "*.elf" -delete
+	find $(CHS_SW_DIR) -name "*.dump" -delete
+	find $(CHS_SW_DIR) -name "*.bin" -delete
+	find $(CHS_SW_DIR) -name "*.memh" -delete
+
+distclean: clean
+	rm -rf $(CHS_SW_DIR)/include/regs
