@@ -32,6 +32,7 @@ module cheshire_atg_wrap #(
   input   logic                 ext_start,      
   input   logic                 ext_stop,
   input   logic [AddrWidth-1:0] start_address_i,
+  input   logic [7:0]           skip_cycles_i,
   output  axi_mst_req_t         axi_mst_req_o,
   input   axi_mst_rsp_t         axi_mst_rsp_i
 );
@@ -56,6 +57,7 @@ module cheshire_atg_wrap #(
     .mst_resp_i(axi_mst_rsp_i),
     .ext_start,
     .ext_stop,
-    .start_address_i
+    .start_address_i, 
+    .skip_cycles_i
   );
 endmodule

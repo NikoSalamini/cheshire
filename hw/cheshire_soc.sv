@@ -109,7 +109,8 @@ module cheshire_soc import cheshire_pkg::*; #(
   // ATG pulse signals
   input ext_start,
   input ext_stop,
-  input logic [Cfg.AddrWidth-1:0] start_address_i
+  input logic [Cfg.AddrWidth-1:0] start_address_i,
+  input logic [7:0] skip_cycles_i
 );
 
   `include "axi/typedef.svh"
@@ -1618,7 +1619,8 @@ module cheshire_soc import cheshire_pkg::*; #(
       .axi_mst_rsp_i  ( axi_atg_rsp_precut ),
       .ext_start,                             // HW VIO
       .ext_stop,                              // HW VIO
-      .start_address_i                        // HW VIO
+      .start_address_i,                       // HW VIO
+      .skip_cycles_i                          // HW VIO
     );
 
     // AXI Cut

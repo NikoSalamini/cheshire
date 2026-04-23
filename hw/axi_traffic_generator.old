@@ -16,14 +16,14 @@ module axi_traffic_generator #(
   /// Number of bursts beats to be generated
   parameter int unsigned NumBurstBeats      = 32'd1,
   /// TAG = [47:14], CACHELINE_IDX = [13:6], BLOCK = [5:3], BLOCK OFFSET = [2:0] (defult)
+  /// Tag Width
+  parameter int unsigned TagLength          = 32'd34, 
   /// NumLines
-  parameter int unsigned NumLines			      = 32'd256, // UNUSED
+  parameter int unsigned NumLines			      = 32'd256,
   /// Number of ways of the LLC
-  parameter int unsigned SetAssociativity	  = 32'd256, // modified to match the actual use-case
+  parameter int unsigned SetAssociativity	  = 32'd256, // actually this represents the total number of sets and not the number of ways in a set
   /// Block Width   
   parameter int unsigned NumBlocks          = 32'd8,
-  /// Skip Cycles Width
-  parameter integer SkipCyclesWidth = 'd8,
   // AXI Bus Types
   parameter int unsigned AddrWidth     = 32'd0,
   parameter int unsigned DataWidth     = 32'd0,
@@ -46,9 +46,6 @@ module axi_traffic_generator #(
 
   // Input Address
   input logic [AddrWidth-1:0] start_address_i,
-
-  // Bandwidth control by skipping cycles
-  input logic [SkipCyclesWidth-1:0] skip_cycles_i,
 
   // Output / Master Port
   output axi_req_t  mst_req_o,
@@ -83,20 +80,14 @@ logic stop_req_d,  stop_req_q;
 logic [AddrWidth-1:0] start_address_d, start_address_q;
 logic [AddrWidth-1:0] end_address_d, end_address_q;		// UNUSED (TODO)
 
-/* logic to configure bandwidth control using skip cycles */
-logic [SkipCyclesWidth-1:0] skip_cycles_d, skip_cycles_q;
-
 /* Counter for the number of ways already covered */
 typedef logic [$clog2(SetAssociativity)-1:0] cnt_ways_t;
 cnt_ways_t cnt_ways_d, cnt_ways_q;
 
-/* Counter for the cycles to skip */
-logic [SkipCyclesWidth-1:0] cnt_skip_cycles_d, cnt_skip_cycles_q;
-
 /* logic to keep the address to be used for the transaction */
 // cacheline idx upper and lower
 localparam int unsigned CachelineIdxLower = $clog2(NumBlocks) + $clog2(DataWidth/8);
-localparam int unsigned CachelineIdxUpper = ($clog2(8) + CachelineIdxLower) - 1;
+localparam int unsigned CachelineIdxUpper = ($clog2(NumLines) + CachelineIdxLower) - 1;
 // tag idx upper and lower to have different tags on all the ways
 localparam int unsigned TagIdxLower	= CachelineIdxUpper + 1;
 localparam int unsigned TagIdxUpper	= ($clog2(SetAssociativity) + TagIdxLower) - 1;
@@ -115,13 +106,9 @@ always_comb begin
   end_address_d   = end_address_q;
   burst_address_d = burst_address_q;
 
-  // bandwidth control using skip cycles
-  skip_cycles_d = skip_cycles_q;
-
   // counters assignment
-  cnt_ways_d        = cnt_ways_q;
-  cnt_beats_d       = cnt_beats_q;
-  cnt_skip_cycles_d = cnt_skip_cycles_q;
+  cnt_ways_d = cnt_ways_q;
+  cnt_beats_d = cnt_beats_q;
 
   // capture start pulse
   if (ext_start)
@@ -177,55 +164,47 @@ always_comb begin
 
     // pulse received, init parameters, starting sending data
     IDLE: begin
-      /* wait for start pulse, setting start_address and cnt_skip_cycles */
+      /* wait for start pulse and aw_ready == 1*/
       if (start_req_q == '1) begin 
-        start_address_d = start_address_i;        // init start
-        skip_cycles_d   = skip_cycles_i;          // init skip_cycles
-        start_req_d     = '0;                     // clear start request
+        start_address_d = start_address_i;  // init start
+        start_req_d     = '0;               // clear start request
         state_d         = INIT_START_ADDR;        // init address   
       end
     end
 
     // init start address for the interference
     INIT_START_ADDR: begin
-      burst_address_d	  = start_address_q;	// init burst start address
-      cnt_skip_cycles_d = skip_cycles_q;    // init skip cycles counter
-      state_d = SET_NEXT_ADDRESS;           // setting the next address for the burst
+      burst_address_d	= start_address_q;	// init burst start address
+      state_d = SET_NEXT_ADDRESS;         // setting the next address for the burst
     end
 
     // set next address for the burst
     SET_NEXT_ADDRESS: begin
-      if (cnt_skip_cycles_q == '0) begin
-        // set aw.addr 
-        mst_req_o.aw_valid  = '1;					      // set aw_valid
-        mst_req_o.aw.addr   = burst_address_q;  // start address to be used
-        if (mst_resp_i.aw_ready) begin
-          // set state and counters
-          state_d     = SEND_BURSTS;            // next state 
-          cnt_beats_d = '0;					            // reset the counter
-          cnt_ways_d	= cnt_ways_q + 1;	        // increase the number of ways that has been targeted
-          cnt_skip_cycles_d = skip_cycles_q;    // reset the counter for skip cycles
+      // set aw.addr 
+      mst_req_o.aw_valid  = '1;					      // set aw_valid
+      mst_req_o.aw.addr   = burst_address_q;  // start address to be used
+      if (mst_resp_i.aw_ready) begin
+        // set state and counters
+        state_d     = SEND_BURSTS;    // next state 
+        cnt_beats_d = '0;					    // reset the counter
+        cnt_ways_d	= cnt_ways_q + 1;	// increase the number of ways that has been targeted
 
-          /* set the address for the next transaction */
-          if (cnt_ways_q == SetAssociativity - 1) begin 
-            // move to next cache line
-            burst_address_d = burst_address_q;                          // keep all the other bits the same
-            burst_address_d[CachelineIdxUpper:CachelineIdxLower] =
-              burst_address_q[CachelineIdxUpper:CachelineIdxLower] + 1; // modify the bits involving the cachelines
+        /* set the address for the next transaction */
+        if (cnt_ways_q == SetAssociativity - 1) begin 
+          // move to next cache line
+          burst_address_d = burst_address_q;                          // keep all the other bits the same
+          burst_address_d[CachelineIdxUpper:CachelineIdxLower] =
+            burst_address_q[CachelineIdxUpper:CachelineIdxLower] + 1; // modify the bits involving the cachelines
 
-            // reset the tag for the ways
-            burst_address_d[TagIdxUpper:TagIdxLower] = '0;              
-            cnt_ways_d = '0;
-          end
-          else begin
-              // move to the next tag
-              burst_address_d = burst_address_q;
-              burst_address_d[TagIdxUpper:TagIdxLower] = burst_address_q[TagIdxUpper:TagIdxLower] + 1;
-          end 
+          // reset the tag for the ways
+          burst_address_d[TagIdxUpper:TagIdxLower] = '0;              
+          cnt_ways_d = '0;
         end
-      end
-      else begin
-        cnt_skip_cycles_d = cnt_skip_cycles_q - 1;
+        else begin
+            // move the next tag
+            burst_address_d = burst_address_q;
+            burst_address_d[TagIdxUpper:TagIdxLower] = burst_address_q[TagIdxUpper:TagIdxLower] + 1;
+        end 
       end
     end
 
@@ -245,7 +224,7 @@ always_comb begin
       // wait until slave is ready
       if (mst_resp_i.w_ready) begin
         // update beat counters
-        cnt_beats_d = cnt_beats_q + 1; // on the last beat -> wrapping to 0 
+        cnt_beats_d = cnt_beats_q + 1;  
 
         // check for the last beat of the burst
         if (cnt_beats_q == NumBurstBeats - 1) begin
@@ -268,12 +247,10 @@ end
 `FFARN(state_q, state_d, IDLE, clk_i, rst_ni)
 `FFARN(cnt_beats_q, cnt_beats_d, '0, clk_i, rst_ni)
 `FFARN(cnt_ways_q, cnt_ways_d, '0, clk_i, rst_ni)
-`FFARN(cnt_skip_cycles_q, cnt_skip_cycles_d, '0, clk_i, rst_ni)
 `FFARN(start_req_q, start_req_d, '0, clk_i, rst_ni)
-`FFARN(stop_req_q,  stop_req_d, '0, clk_i, rst_ni)
-`FFARN(start_address_q,  start_address_d, '0, clk_i, rst_ni)
-`FFARN(end_address_q,  end_address_d, '0, clk_i, rst_ni)
-`FFARN(burst_address_q,  burst_address_d, '0, clk_i, rst_ni)
-`FFARN(skip_cycles_q, skip_cycles_d, '0, clk_i, rst_ni)
+`FFARN(stop_req_q,  stop_req_d,  '0, clk_i, rst_ni)
+`FFARN(start_address_q,  start_address_d,  '0, clk_i, rst_ni)
+`FFARN(end_address_q,  end_address_d,  '0, clk_i, rst_ni)
+`FFARN(burst_address_q,  burst_address_d,  '0, clk_i, rst_ni)
 
 endmodule

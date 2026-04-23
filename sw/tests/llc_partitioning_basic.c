@@ -24,6 +24,8 @@ static int probe_rw(void *base, int offs, uint32_t val) {
 
 #define LLC_RW_TEST_REG(NAME, VAL) \
     err = probe_rw(&__base_llc, NAME, VAL); \
+    printf("probe DONE\n"); \
+    uart_write_flush(&__base_uart); \
     if (err) { \
         printf("error: rw " #NAME "\n"); \
         uart_write_flush(&__base_uart); \
