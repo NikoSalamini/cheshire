@@ -17,7 +17,7 @@ module axi_traffic_generator #(
   parameter int unsigned NumBurstBeats      = 32'd1,
   /// TAG = [47:14], CACHELINE_IDX = [13:6], BLOCK = [5:3], BLOCK OFFSET = [2:0] (defult)
   /// NumLines
-  parameter int unsigned NumLines			      = 32'd256, // UNUSED
+  parameter int unsigned NumLines			      = 32'd256, 
   /// Number of ways of the LLC
   parameter int unsigned SetAssociativity	  = 32'd256, // modified to match the actual use-case
   /// Block Width   
@@ -96,7 +96,7 @@ logic [SkipCyclesWidth-1:0] cnt_skip_cycles_d, cnt_skip_cycles_q;
 /* logic to keep the address to be used for the transaction */
 // cacheline idx upper and lower
 localparam int unsigned CachelineIdxLower = $clog2(NumBlocks) + $clog2(DataWidth/8);
-localparam int unsigned CachelineIdxUpper = ($clog2(8) + CachelineIdxLower) - 1;
+localparam int unsigned CachelineIdxUpper = ($clog2(NumLines) + CachelineIdxLower) - 1;
 // tag idx upper and lower to have different tags on all the ways
 localparam int unsigned TagIdxLower	= CachelineIdxUpper + 1;
 localparam int unsigned TagIdxUpper	= ($clog2(SetAssociativity) + TagIdxLower) - 1;
