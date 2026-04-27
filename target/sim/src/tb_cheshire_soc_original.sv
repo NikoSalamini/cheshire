@@ -65,16 +65,6 @@ module tb_cheshire_soc #(
     // Wait for the UART to finish reading the current byte
     wait (fix.vip.uart_reading_byte == 0);
 
-    // ATG phase
-    fix.vip.set_ext_start(1'b1);
-    #100ns;
-    fix.vip.set_ext_start(1'b0);
-
-    #10000ns;
-    fix.vip.set_ext_stop(1'b1);
-    #100ns;
-    fix.vip.set_ext_stop(1'b0);
-
     $finish;
   end
 

@@ -558,14 +558,17 @@ module cheshire_soc import cheshire_pkg::*; #(
     end
 
     /* hard-coding the user channel to 1 for transactions starting with 0xC0 for atg marking */
+    /* NB: The MSB and LSB are by default 5,2. For example for 100, the user channel will be 1. */
     always_comb begin
       tagger_req_mod = tagger_req;
 
-      if ((tagger_req.aw.addr[31:24] == 8'hC0) ||
-          (tagger_req.ar.addr[31:24] == 8'hC0)) begin
-        tagger_req_mod.ar.user[0] = 1'b1;
-        tagger_req_mod.aw.user[0] = 1'b1;
+      if (tagger_req.aw.addr[31:24] == 8'hC0) begin
+        tagger_req_mod.aw.user[2] = 1'b1;
       end
+
+      if (tagger_req.ar.addr[31:24] == 8'hC0) begin
+        tagger_req_mod.ar.user[2] = 1'b1;
+      end 
     end
 
     axi_llc_reg_wrap #(

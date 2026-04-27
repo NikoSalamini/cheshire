@@ -72,7 +72,10 @@ module vip_cheshire_soc import cheshire_pkg::*; #(
   output logic [SlinkNumChan-1:0]                    slink_rcv_clk_i,
   input  logic [SlinkNumChan-1:0]                    slink_rcv_clk_o,
   output logic [SlinkNumChan-1:0][SlinkNumLanes-1:0] slink_i,
-  input  logic [SlinkNumChan-1:0][SlinkNumLanes-1:0] slink_o
+  input  logic [SlinkNumChan-1:0][SlinkNumLanes-1:0] slink_o,
+  // ATG
+  output logic ext_start,
+  output logic ext_stop
 );
 
   `include "cheshire/typedef.svh"
@@ -179,6 +182,23 @@ module vip_cheshire_soc import cheshire_pkg::*; #(
     test_mode = '0;
     boot_mode = '0;
   end
+
+  initial begin
+    ext_start = 1'b0;
+    ext_stop  = 1'b0;
+  end
+
+  ///////////////////
+  //      ATG      //
+  ///////////////////
+
+  task set_ext_start(input logic val);
+    ext_start = val;
+  endtask
+
+  task set_ext_stop(input logic val);
+    ext_stop = val;
+  endtask
 
   task wait_for_reset;
     @(posedge rst_n);

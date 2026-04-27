@@ -31,6 +31,10 @@ module fixture_cheshire_soc #(
   logic [1:0] boot_mode;
   logic       rtc;
 
+  // atg related
+  logic ext_start;
+  logic ext_stop;
+
   axi_llc_req_t axi_llc_mst_req;
   axi_llc_rsp_t axi_llc_mst_rsp;
 
@@ -143,9 +147,10 @@ module fixture_cheshire_soc #(
     .usb_dp_i           ( '0 ),
     .usb_dp_o           ( ),
     .usb_dp_oe_o        ( ),
-    .ext_start          ('0),
-    .ext_stop           ('0),
-    .start_address_i    ('0)
+    .ext_start          (ext_start),
+    .ext_stop           (ext_stop),
+    .start_address_i    (32'hC0000000),  // FIXED
+    .skip_cycles_i      ('1)   // FIXED
   );
 
   ////////////////////////
