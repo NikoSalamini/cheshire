@@ -32,6 +32,7 @@ extern void *__base_clic;
 extern void *__base_usb;
 extern void *__base_spm;
 extern void *__base_dram;
+extern void *__base_tagger;
 
 // Default boot baudrate
 static const uint32_t __BOOT_BAUDRATE = 115200;
