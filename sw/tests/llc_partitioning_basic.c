@@ -16,15 +16,18 @@
 #include "regs/tagger.h"
 #include "util.h"
 #include "printf.h"
+#include "regs/axi_rt.h"
+#include "axirt.h"
 
 /* Function prototypes */
 static int probe_rw(void *base, int offs, uint32_t val);
 static int probe_w(void *base, int offs, uint32_t val);
-// extern char __base_tagger[];
 
 static int probe_rw(void *base, int offs, uint32_t val) {
     *(volatile uint32_t *)((uint8_t *)base + offs) = val;
     uint32_t ret = *reg32(base, offs);
+    printf("Writing at offset %d\n", offs);
+    uart_write_flush(&__base_uart);
     return !(ret == val);
 }
 
@@ -45,6 +48,9 @@ static int probe_w(void *base, int offs, uint32_t val) {
         : "memory"
     );
 
+    // Print write address
+    printf("Writing at offset %d\n", offs);
+    uart_write_flush(&__base_uart);
     return 0;
 }
 
@@ -171,7 +177,10 @@ int configure_tagger_addr (unsigned int idx, unsigned int mode, uint64_t addr) {
 }
 
 int configure_tagger_patid(unsigned int idx, uint8_t patid) {
-    if (idx >= TAGGER_REG_PATID_MULTIREG_COUNT) {
+    /* checking max entry index, 4 byte registers, 4 bit entries -> 
+    TAGGER_REG_PATID_MULTIREG_COUNT * 32/4 (bit) */
+    unsigned int total_entries = TAGGER_REG_PATID_MULTIREG_COUNT * 8;
+    if (idx >= total_entries) {
         printf("error: tagger patid idx %u out of bounds (max %d)\n",
                idx, TAGGER_REG_PATID_MULTIREG_COUNT - 1);
         uart_write_flush(&__base_uart);
@@ -220,61 +229,143 @@ int configure_tagger_patid(unsigned int idx, uint8_t patid) {
 int main(void) {
     int err = 0;
 
-    printf("base_tagger = 0x%08X\n", __base_tagger);
-    uart_write_flush(&__base_uart);
+    // Immediately return an error if AXI_REALM, DMA, or UART are not present
+    CHECK_ASSERT(-1, chs_hw_feature_present(CHESHIRE_HW_FEATURES_AXIRT_BIT));
+    CHECK_ASSERT(-2, chs_hw_feature_present(CHESHIRE_HW_FEATURES_DMA_BIT));
+    CHECK_ASSERT(-3, chs_hw_feature_present(CHESHIRE_HW_FEATURES_UART_BIT));
+
+    // // This test requires at least two subordinate regions
+    CHECK_ASSERT(-4, AXI_RT_PARAM_NUM_SUB >= 2);
 
     // Init UART
     uint32_t rtc_freq = *reg32(&__base_regs, CHESHIRE_RTC_FREQ_REG_OFFSET);
     uint64_t reset_freq = clint_get_core_freq(rtc_freq, 2500);
     uart_init(&__base_uart, reset_freq, 115200);
 
+    // Enable and configure AXI REALM
+    printf("AXI_RT configuration starts \n\r");
+    __axirt_claim(1, 1);
+    __axirt_set_len_limit_group(2, 0);
+    printf("Claimed access to the axi_realm \n\r");
+    uart_write_flush(&__base_uart);
+
+    // Configure AXI-RT CVA6 core 0
+    __axirt_set_region(0, 0xffffffff, 0, 0);
+    __axirt_set_region(0x100000000, 0xffffffffffffffff, 1, 0);
+    __axirt_set_budget(8, 0, 0);
+    __axirt_set_budget(8, 1, 0);
+    __axirt_set_period(100, 0, 0);
+    __axirt_set_period(100, 1, 0);
+    printf("Configured cva6 core \n\r");
+    uart_write_flush(&__base_uart);
+
+    // Configure AXI-RT ATG
+    int chs_dma_id = *reg32(&__base_regs, CHESHIRE_NUM_INT_HARTS_REG_OFFSET) + 1;
+    // IN REAL IMPLEMENTATION NEEDS +3, 4 IN SIMULATION
+    #ifdef SIM
+    int chs_atg_id = *reg32(&__base_regs, CHESHIRE_NUM_INT_HARTS_REG_OFFSET) + 4;
+    #else
+    int chs_atg_id = *reg32(&__base_regs, CHESHIRE_NUM_INT_HARTS_REG_OFFSET) + 3;
+    #endif
+    printf("ID dma: %d, ID ATG: %d\n\r", chs_dma_id, chs_atg_id);
+
+    // region
+    uart_write_flush(&__base_uart);
+    __axirt_set_region(0, 0xffffffff, 0, chs_atg_id);
+    printf("Configured region 0 for atg \n\r");
+    uart_write_flush(&__base_uart);
+    __axirt_set_region(0x100000000, 0xffffffffffffffff, 1, chs_atg_id);
+    printf("Configured region 1 for atg \n\r");
+    uart_write_flush(&__base_uart);
+
+    // budget
+    __axirt_set_budget(8, 0, chs_atg_id);
+    printf("Configured budget 0 for atg \n\r");
+    __axirt_set_budget(8, 1, chs_atg_id);
+    printf("Configured budget 1 for atg \n\r");
+    uart_write_flush(&__base_uart);
+
+    // period
+    __axirt_set_period(100, 0, chs_atg_id);
+    printf("Configured period 0 for atg \n\r");
+    uart_write_flush(&__base_uart);
+    __axirt_set_period(100, 1, chs_atg_id);
+    printf("Configured period 1 for atg \n\r");
+    uart_write_flush(&__base_uart);
+
+    // print
+    printf("Configured atg \n\r");
+    uart_write_flush(&__base_uart);
+
+    // Enable RT unit for ATG (bit 5) and CVA6 core 0 (bit 0)
+    // ENABLE 0x11 FOR REAL IMPLEMENTATION, SIMULATION 0x21
+    #ifdef SIM
+    __axirt_enable(0x21);           
+    #else
+    __axirt_enable(0x11);
+    #endif
+    printf("enabled axi_rt \n\r");
+    uart_write_flush(&__base_uart);
+
     // Read LLC version register
     uint32_t low = *reg32(&__base_llc, AXI_LLC_VERSION_LOW_REG_OFFSET);
     uint32_t high = *reg32(&__base_llc, AXI_LLC_VERSION_HIGH_REG_OFFSET);
     uint64_t version = ((uint64_t)high << 32) | ((uint64_t)low);
+    printf("llc ver = 0x%016X\n", version);
+    uart_write_flush(&__base_uart);
 
     // Run basic register rw tests
-    // LLC_RW_TEST_REG(AXI_LLC_CFG_FLUSH_PARTITION_LOW_REG_OFFSET, 0xcafedead);
-    // LLC_RW_TEST_REG(AXI_LLC_CFG_FLUSH_PARTITION_HIGH_REG_OFFSET, 0xcafedead);
+    LLC_RW_TEST_REG(AXI_LLC_CFG_FLUSH_PARTITION_LOW_REG_OFFSET, 0xcafedead);
+    LLC_RW_TEST_REG(AXI_LLC_CFG_FLUSH_PARTITION_HIGH_REG_OFFSET, 0xcafedead);
 
     // configure LLC
     LLC_RW_TEST_REG(AXI_LLC_CFG_SET_PARTITION_LOW_0_REG_OFFSET, 0x0000007f);
     LLC_RW_TEST_REG(AXI_LLC_CFG_SET_PARTITION_LOW_1_REG_OFFSET, 0x00000000);
-    LLC_W_TEST_REG(AXI_LLC_COMMIT_PARTITION_CFG_REG_OFFSET, 0x00000001); // (ADDED)
+    LLC_W_TEST_REG(AXI_LLC_COMMIT_PARTITION_CFG_REG_OFFSET, 0x00000001); 
 
-    /* configure tagger patid*/
-    configure_tagger_patid(0, 3);
-    configure_tagger_patid(1, 4);
+    // configure tagger patid
+    configure_tagger_patid(0, 0); // cva6 core
+    configure_tagger_patid(1, 4); // atg
 
-    /* configure tagger partitions*/
-    configure_tagger_addr(0, 1, 0xC0000000);
-    configure_tagger_addr(1, 1, 0xD0000000);
+    // configure tagger partitions
+    configure_tagger_addr(0, 1, 0xC0000000); // cva6 0x0-0xBffffff
+    configure_tagger_addr(1, 1, 0xD0000000); // 0xC0000000-
 
     // set memory configuration to cache and not SPM (ADDED)
     LLC_RW_TEST_REG(AXI_LLC_CFG_SPM_LOW_REG_OFFSET, 0x00000000);
     LLC_RW_TEST_REG(AXI_LLC_CFG_SPM_HIGH_REG_OFFSET, 0x00000000);
     LLC_W_TEST_REG(AXI_LLC_COMMIT_PARTITION_CFG_REG_OFFSET, 0x00000001);
 
-    /* memstresser like */
-    // // Allocate memory
-    // volatile uint8_t buffer[2048];
+    // start atg 
+    printf("Starting the atg \n\r");
+    uart_write_flush(&__base_uart);
+    volatile uint32_t dummy;
+    asm volatile(
+        "li t0, 0x00001000\n"
+        "lw %0, 0(t0)\n"
+        : "=r"(dummy)
+        :
+        : "t0", "memory"
+    );
 
-    // // Initialize buffer (important for read-only mode)
-    // for (size_t i = 0; i < 2048; i++) {
-    //     buffer[i] = (uint8_t)i;
-    // }
-    
-    // volatile uint8_t sink = 0;
-    // for (size_t i = 0; i < 2048; i++) {
-    //     buffer[i] = (uint8_t)i;
-    // }
+    /* memstresser like */
+    static volatile uint8_t buffer[8192];
+    volatile uint8_t sink = 0;
+
+    for (size_t i = 0; i < 8192; i++) {
+        buffer[i] = 0;
+    }
+
+    for (size_t i = 0; i < 8192; i += 64) {
+        buffer[i]++;
+    }
+
+    for (size_t i = 0; i < 8192; i += 64) {
+        sink ^= buffer[(i * 167) % 8192];
+    }
 
     // LLC_RW_TEST_REG(AXI_LLC_CFG_SET_PARTITION_HIGH_0_REG_OFFSET, 0xdeadc0de);
     // LLC_RW_TEST_REG(AXI_LLC_CFG_SET_PARTITION_HIGH_1_REG_OFFSET, 0xdeadc0de);
-
-    // print version
-    printf("llc ver = 0x%016X\n", version);
-    uart_write_flush(&__base_uart);
 
     return 0;
 }

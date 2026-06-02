@@ -37,10 +37,10 @@ module tb_cheshire_soc #(
     // Wait for reset
     fix.vip.wait_for_reset();
 
-    // ATG phase
-    fix.vip.set_ext_start(1'b1);
-    #100ns;
-    fix.vip.set_ext_start(1'b0);
+    // // ATG phase
+    // fix.vip.set_ext_start(1'b1);
+    // #100ns;
+    // fix.vip.set_ext_start(1'b0);
 
     // Preload in idle mode or wait for completion in autonomous boot
     if (boot_mode == 0) begin
@@ -70,7 +70,7 @@ module tb_cheshire_soc #(
     // Wait for the UART to finish reading the current byte
     wait (fix.vip.uart_reading_byte == 0);
 
-    #10000ns;
+    #5000ns;
     fix.vip.set_ext_stop(1'b1);
     #100ns;
     fix.vip.set_ext_stop(1'b0);

@@ -45,6 +45,7 @@ sources:
   - hw/cheshire_idma_wrap.sv
   - hw/cheshire_atg_wrap.sv
   - hw/axi_traffic_generator.sv
+  - hw/stall_checker.sv
   - hw/cheshire_pkg.sv
   - hw/cheshire_soc.sv
 

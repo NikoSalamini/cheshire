@@ -150,7 +150,7 @@ module fixture_cheshire_soc #(
     .ext_start          (ext_start),
     .ext_stop           (ext_stop),
     .start_address_i    (32'hC0000000),  // FIXED
-    .skip_cycles_i      ('1)   // FIXED
+    .skip_cycles_i      ('0)   // FIXED
   );
 
   ////////////////////////

@@ -668,8 +668,8 @@ package cheshire_pkg;
     Dma               : 1,
     SerialLink        : 1,
     Vga               : 1,
-    Usb               : 1,
-    AxiRt             : 0, 
+    Usb               : 0,  // disable to enable the axi_rt for the ATG in simulation
+    AxiRt             : 1,  // set to 1 for simulation
     Clic              : 0,
     IrqRouter         : 0,
     BusErr            : 1,

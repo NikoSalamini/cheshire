@@ -571,43 +571,6 @@ module cheshire_soc import cheshire_pkg::*; #(
       end 
     end
 
-    logic sc_ext_start, sc_ext_stop;
-    always_ff @(posedge clk_i) begin
-      sc_ext_start <= 1'b0;
-      sc_ext_stop  <= 1'b0;
-      if (axi_rt_in_req[0].ar.addr == 32'h00001000) sc_ext_start <= 1'b1;
-      if (axi_rt_in_req[0].ar.addr == 32'h00002000) sc_ext_stop  <= 1'b1;
-    end
-
-    stall_checker #(
-      .NumUserVals( 8 ),
-      .UserWidth  ( Cfg.AxiUserWidth ),
-      .axi_req_t  ( axi_slv_req_t   ),
-      .axi_resp_t ( axi_slv_rsp_t   )
-    ) i_llc_stall_checker (
-      .clk_i,
-      .rst_ni,
-      .ext_start_i    ( sc_ext_start   ),
-      .ext_stop_i     ( sc_ext_stop    ),
-      .axi_req_i      ( tagger_req_mod ),
-      .axi_resp_i     ( tagger_rsp     ),
-      .aw_max_stall_o ( /* not connected */ ),
-      .ar_max_stall_o ( /* not connected */ ),
-      .w_max_stall_o  ( /* not connected */ ),
-      .b_max_stall_o  ( /* not connected */ ),
-      .r_max_stall_o  ( /* not connected */ ),
-      .aw_avg_sum_o   ( /* not connected */ ),
-      .aw_avg_cnt_o   ( /* not connected */ ),
-      .ar_avg_sum_o   ( /* not connected */ ),
-      .ar_avg_cnt_o   ( /* not connected */ ),
-      .w_avg_sum_o    ( /* not connected */ ),
-      .w_avg_cnt_o    ( /* not connected */ ),
-      .b_avg_sum_o    ( /* not connected */ ),
-      .b_avg_cnt_o    ( /* not connected */ ),
-      .r_avg_sum_o    ( /* not connected */ ),
-      .r_avg_cnt_o    ( /* not connected */ )
-    );
-
     axi_llc_reg_wrap #(
       .SetAssociativity ( Cfg.LlcSetAssoc       ),
       .NumLines         ( Cfg.LlcNumLines       ),
@@ -641,9 +604,7 @@ module cheshire_soc import cheshire_pkg::*; #(
       .cached_start_addr_i ( addr_t'(Cfg.LlcOutRegionStart) ),
       .cached_end_addr_i   ( addr_t'(Cfg.LlcOutRegionEnd)   ),
       .spm_start_addr_i    ( addr_t'(AmSpm) ),
-      .axi_llc_events_o    ( /* TODO: connect me to regs? */ ),
-      .sc_ext_start_i      ( sc_ext_start ),
-      .sc_ext_stop_i       ( sc_ext_stop  )
+      .axi_llc_events_o    ( /* TODO: connect me to regs? */ )
     );
 
   end else if (Cfg.LlcOutConnect) begin : gen_llc_bypass

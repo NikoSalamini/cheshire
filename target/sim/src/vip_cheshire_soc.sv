@@ -12,7 +12,7 @@
 module vip_cheshire_soc import cheshire_pkg::*; #(
   // DUT (must be set)
   parameter cheshire_cfg_t DutCfg           = '0,
-  parameter bit           UseDramSys        = 0,
+  parameter bit           UseDramSys        = 1, // using accurate dram for simulation to see stalls in shared resources
   parameter type          axi_ext_llc_req_t = logic,
   parameter type          axi_ext_llc_rsp_t = logic,
   parameter type          axi_ext_mst_req_t = logic,
