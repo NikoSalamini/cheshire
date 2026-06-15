@@ -109,6 +109,7 @@ module cheshire_soc import cheshire_pkg::*; #(
   // ATG pulse signals
   input ext_start,
   input ext_stop,
+  input logic        mode_i,
   input logic [Cfg.AddrWidth-1:0] start_address_i,
   input logic [7:0] skip_cycles_i
 );
@@ -230,6 +231,17 @@ module cheshire_soc import cheshire_pkg::*; #(
   axi_mst_rsp_t [AxiIn.num_in-1:0]    axi_in_rsp, axi_rt_in_rsp;
   axi_slv_req_t [AxiOut.num_out-1:0]  axi_out_req;
   axi_slv_rsp_t [AxiOut.num_out-1:0]  axi_out_rsp;
+
+  // Shared stall-checker window signals (address-triggered from core 0 AR channel).
+  // Driven from LLC magic-address reads when LLC is present; tied low otherwise.
+  logic sc_ext_start, sc_ext_stop;
+
+  always_ff @(posedge clk_i) begin
+    sc_ext_start <= 1'b0;
+    sc_ext_stop  <= 1'b0;
+    if (axi_rt_in_req[0].ar.addr == 32'h00003000) sc_ext_start <= 1'b1;
+    if (axi_rt_in_req[0].ar.addr == 32'h00004000) sc_ext_stop  <= 1'b1;
+  end
 
   // Configure AXI Xbar
   localparam axi_pkg::xbar_cfg_t AxiXbarCfg = '{
@@ -571,41 +583,24 @@ module cheshire_soc import cheshire_pkg::*; #(
       end 
     end
 
-    logic sc_ext_start, sc_ext_stop;
-    always_ff @(posedge clk_i) begin
-      sc_ext_start <= 1'b0;
-      sc_ext_stop  <= 1'b0;
-      if (axi_rt_in_req[0].ar.addr == 32'h00001000) sc_ext_start <= 1'b1;
-      if (axi_rt_in_req[0].ar.addr == 32'h00002000) sc_ext_stop  <= 1'b1;
-    end
-
     stall_checker #(
-      .NumUserVals( 8 ),
-      .UserWidth  ( Cfg.AxiUserWidth ),
-      .axi_req_t  ( axi_slv_req_t   ),
-      .axi_resp_t ( axi_slv_rsp_t   )
+      .axi_req_t  ( axi_slv_req_t ),
+      .axi_resp_t ( axi_slv_rsp_t )
     ) i_llc_stall_checker (
       .clk_i,
       .rst_ni,
-      .ext_start_i    ( sc_ext_start   ),
-      .ext_stop_i     ( sc_ext_stop    ),
-      .axi_req_i      ( tagger_req_mod ),
-      .axi_resp_i     ( tagger_rsp     ),
-      .aw_max_stall_o ( /* not connected */ ),
-      .ar_max_stall_o ( /* not connected */ ),
-      .w_max_stall_o  ( /* not connected */ ),
-      .b_max_stall_o  ( /* not connected */ ),
-      .r_max_stall_o  ( /* not connected */ ),
-      .aw_avg_sum_o   ( /* not connected */ ),
-      .aw_avg_cnt_o   ( /* not connected */ ),
-      .ar_avg_sum_o   ( /* not connected */ ),
-      .ar_avg_cnt_o   ( /* not connected */ ),
-      .w_avg_sum_o    ( /* not connected */ ),
-      .w_avg_cnt_o    ( /* not connected */ ),
-      .b_avg_sum_o    ( /* not connected */ ),
-      .b_avg_cnt_o    ( /* not connected */ ),
-      .r_avg_sum_o    ( /* not connected */ ),
-      .r_avg_cnt_o    ( /* not connected */ )
+      .ext_start_i   ( sc_ext_start   ),
+      .ext_stop_i    ( sc_ext_stop    ),
+      .axi_req_i     ( tagger_req_mod ),
+      .axi_resp_i    ( tagger_rsp     ),
+      .ar_max_lat_o  ( /* not connected */ ),
+      .ar_avg_sum_o  ( /* not connected */ ),
+      .ar_avg_cnt_o  ( /* not connected */ ),
+      .ar_overflow_o ( /* not connected */ ),
+      .aw_max_lat_o  ( /* not connected */ ),
+      .aw_avg_sum_o  ( /* not connected */ ),
+      .aw_avg_cnt_o  ( /* not connected */ ),
+      .aw_overflow_o ( /* not connected */ )
     );
 
     axi_llc_reg_wrap #(
@@ -867,6 +862,27 @@ module cheshire_soc import cheshire_pkg::*; #(
       .slv_resp_o ( core_ur_rsp ),
       .mst_req_o  ( axi_in_req[AxiIn.cores[i]] ),
       .mst_resp_i ( axi_in_rsp[AxiIn.cores[i]] )
+    );
+
+    // SC: latency from CVA6 core i to the xbar slave port
+    stall_checker #(
+      .axi_req_t  ( axi_mst_req_t ),
+      .axi_resp_t ( axi_mst_rsp_t )
+    ) i_cpu_sc (
+      .clk_i,
+      .rst_ni,
+      .ext_start_i   ( sc_ext_start                  ),
+      .ext_stop_i    ( sc_ext_stop                   ),
+      .axi_req_i     ( axi_in_req[AxiIn.cores[i]]   ),
+      .axi_resp_i    ( axi_in_rsp[AxiIn.cores[i]]   ),
+      .ar_max_lat_o  ( /* not connected */           ),
+      .ar_avg_sum_o  ( /* not connected */           ),
+      .ar_avg_cnt_o  ( /* not connected */           ),
+      .ar_overflow_o ( /* not connected */           ),
+      .aw_max_lat_o  ( /* not connected */           ),
+      .aw_avg_sum_o  ( /* not connected */           ),
+      .aw_avg_cnt_o  ( /* not connected */           ),
+      .aw_overflow_o ( /* not connected */           )
     );
   end
 
@@ -1675,6 +1691,7 @@ module cheshire_soc import cheshire_pkg::*; #(
       .axi_mst_rsp_i  ( axi_atg_rsp_precut ),
       .ext_start (ext_start_mod),             // HW VIO
       .ext_stop  (ext_stop_mod),              // HW VIO
+      .mode_i,                                // HW VIO: 0=write, 1=read
       .start_address_i,                       // HW VIO
       .skip_cycles_i                          // HW VIO
     );
@@ -1696,6 +1713,27 @@ module cheshire_soc import cheshire_pkg::*; #(
       .slv_resp_o ( axi_atg_rsp_precut    ),
       .mst_req_o  ( axi_atg_req           ),
       .mst_resp_i ( axi_in_rsp[AxiIn.atg] )
+    );
+
+    // SC: latency from ATG to the xbar slave port
+    stall_checker #(
+      .axi_req_t  ( axi_mst_req_t ),
+      .axi_resp_t ( axi_mst_rsp_t )
+    ) i_atg_sc (
+      .clk_i,
+      .rst_ni,
+      .ext_start_i   ( sc_ext_start           ),
+      .ext_stop_i    ( sc_ext_stop            ),
+      .axi_req_i     ( axi_atg_req            ),
+      .axi_resp_i    ( axi_in_rsp[AxiIn.atg]  ),
+      .ar_max_lat_o  ( /* not connected */    ),
+      .ar_avg_sum_o  ( /* not connected */    ),
+      .ar_avg_cnt_o  ( /* not connected */    ),
+      .ar_overflow_o ( /* not connected */    ),
+      .aw_max_lat_o  ( /* not connected */    ),
+      .aw_avg_sum_o  ( /* not connected */    ),
+      .aw_avg_cnt_o  ( /* not connected */    ),
+      .aw_overflow_o ( /* not connected */    )
     );
 
     // TODO missing bus err

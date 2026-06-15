@@ -41,8 +41,9 @@ module axi_traffic_generator #(
   input  logic  rst_ni, // active low
 
   // Input control signals
-  input ext_start,      
+  input ext_start,
   input ext_stop,
+  input logic   mode_i, // 0 = write burst generation, 1 = read burst generation
 
   // Input Address
   input logic [AddrWidth-1:0] start_address_i,
@@ -151,18 +152,18 @@ always_comb begin
   mst_req_o.aw.lock   = '0;         // (unused) AxLOCK is used to raise an error if someone writes the region of memory while this transaction is running
   mst_req_o.aw.qos    = '0;         // not used
 
-  /* Set the read channel to 0s to have AXI4 compliancy. It cannot be X */
+  /* AR channel defaults */
   mst_req_o.ar_valid  = '0;
   mst_req_o.ar.addr   = '0;
   mst_req_o.ar.id     = '0;
-  mst_req_o.r_ready   = '1; // always ready to receive reads (unused but it's for compliancy)
+  mst_req_o.r_ready   = '1; // always ready to receive read data
 
   // other ar signals
-  mst_req_o.ar.cache  = '0; // caching channel not used
-  mst_req_o.ar.prot   = '0; // prot not used
+  mst_req_o.ar.cache  = 4'b0110; // RA=1, Modifiable=1: allocate on read, let LLC cache
+  mst_req_o.ar.prot   = '0;
   mst_req_o.ar.user   = '0; // TODO: TAG?
-  mst_req_o.ar.lock   = '0; // (unused) AxLOCK is used to raise an error if someone writes the region of memory while this transaction is running
-  mst_req_o.ar.qos    = '0; // not used
+  mst_req_o.ar.lock   = '0;
+  mst_req_o.ar.qos    = '0;
 
   // burst parameters 
   mst_req_o.aw.burst  = axi_pkg::BURST_INCR;  // INCR burst: the slave increases the addresses according to AxSIZE
@@ -196,64 +197,77 @@ always_comb begin
     // set next address for the burst
     SET_NEXT_ADDRESS: begin
       if (cnt_skip_cycles_q == '0) begin
-        // set aw.addr 
-        mst_req_o.aw_valid  = '1;					      // set aw_valid
-        mst_req_o.aw.addr   = burst_address_q;  // start address to be used
-        if (mst_resp_i.aw_ready) begin
-          // set state and counters
-          state_d     = SEND_BURSTS;            // next state 
-          cnt_beats_d = '0;					            // reset the counter
-          cnt_ways_d	= cnt_ways_q + 1;	        // increase the number of ways that has been targeted
-          cnt_skip_cycles_d = skip_cycles_q;    // reset the counter for skip cycles
-
-          /* set the address for the next transaction */
-          if (cnt_ways_q == SetAssociativity - 1) begin 
-            // move to next cache line
-            burst_address_d = burst_address_q;                          // keep all the other bits the same
-            burst_address_d[CachelineIdxUpper:CachelineIdxLower] =
-              burst_address_q[CachelineIdxUpper:CachelineIdxLower] + 1; // modify the bits involving the cachelines
-
-            // reset the tag for the ways
-            burst_address_d[TagIdxUpper:TagIdxLower] = '0;              
-            cnt_ways_d = '0;
-          end
-          else begin
-              // move to the next tag
-              burst_address_d = burst_address_q;
-              burst_address_d[TagIdxUpper:TagIdxLower] = burst_address_q[TagIdxUpper:TagIdxLower] + 1;
-          end 
+        // drive the correct address channel depending on mode
+        if (!mode_i) begin
+          mst_req_o.aw_valid = '1;
+          mst_req_o.aw.addr  = burst_address_q;
+        end else begin
+          mst_req_o.ar_valid = '1;
+          mst_req_o.ar.addr  = burst_address_q;
         end
-      end
-      else begin
+
+        // wait for the handshake on the selected channel
+        if ((!mode_i && mst_resp_i.aw_ready) || (mode_i && mst_resp_i.ar_ready)) begin
+          state_d           = SEND_BURSTS;
+          cnt_beats_d       = '0;
+          cnt_ways_d        = cnt_ways_q + 1;
+          cnt_skip_cycles_d = skip_cycles_q;
+
+          /* set the address for the next transaction (same logic for both modes) */
+          if (cnt_ways_q == SetAssociativity - 1) begin
+            // move to next cache line
+            burst_address_d = burst_address_q;
+            burst_address_d[CachelineIdxUpper:CachelineIdxLower] =
+              burst_address_q[CachelineIdxUpper:CachelineIdxLower] + 1;
+            burst_address_d[TagIdxUpper:TagIdxLower] = '0;
+            cnt_ways_d = '0;
+          end else begin
+            // move to the next tag (next way)
+            burst_address_d = burst_address_q;
+            burst_address_d[TagIdxUpper:TagIdxLower] =
+              burst_address_q[TagIdxUpper:TagIdxLower] + 1;
+          end
+        end
+      end else begin
         cnt_skip_cycles_d = cnt_skip_cycles_q - 1;
       end
     end
 
-    // send bursts until stop
+    // send (write mode) or receive (read mode) burst beats until stop
     SEND_BURSTS: begin
-      // w_valid set to 1
-      mst_req_o.w_valid = 1'b1;
+      if (!mode_i) begin
+        // --- write mode: drive W channel ---
+        mst_req_o.w_valid = 1'b1;
+        mst_req_o.w.data  = '1;
 
-      // data is all '1
-      mst_req_o.w.data = '1;
+        if (cnt_beats_q == NumBurstBeats - 1)
+          mst_req_o.w.last = 1'b1;
 
-      // last beat generation
-      if (cnt_beats_q == NumBurstBeats - 1) begin
-        mst_req_o.w.last = 1'b1;
-      end
+        if (mst_resp_i.w_ready) begin
+          cnt_beats_d = cnt_beats_q + 1;
 
-      // wait until slave is ready
-      if (mst_resp_i.w_ready) begin
-        // update beat counters
-        cnt_beats_d = cnt_beats_q + 1; // on the last beat -> wrapping to 0 
+          if (cnt_beats_q == NumBurstBeats - 1) begin
+            if (stop_req_q) begin
+              stop_req_d = '0;
+              state_d    = IDLE;
+            end else begin
+              state_d = SET_NEXT_ADDRESS;
+            end
+          end
+        end
 
-        // check for the last beat of the burst
-        if (cnt_beats_q == NumBurstBeats - 1) begin
-          if (stop_req_q) begin
-            stop_req_d = '0;      // clean stop sticky reg  
-            state_d    = IDLE;    // back to IDLE
-          end else begin
-            state_d = SET_NEXT_ADDRESS;  // init the address for the next burst
+      end else begin
+        // --- read mode: consume R channel beats (r_ready = 1 from defaults) ---
+        if (mst_resp_i.r_valid) begin
+          cnt_beats_d = cnt_beats_q + 1;
+
+          if (cnt_beats_q == NumBurstBeats - 1) begin
+            if (stop_req_q) begin
+              stop_req_d = '0;
+              state_d    = IDLE;
+            end else begin
+              state_d = SET_NEXT_ADDRESS;
+            end
           end
         end
       end

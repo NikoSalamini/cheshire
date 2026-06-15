@@ -226,6 +226,9 @@ int configure_tagger_patid(unsigned int idx, uint8_t patid) {
     return 0;
 }
 
+// SIM active if this is defined
+#define SIM
+
 int main(void) {
     int err = 0;
 
@@ -308,15 +311,11 @@ int main(void) {
     uart_write_flush(&__base_uart);
 
     // Read LLC version register
-    uint32_t low = *reg32(&__base_llc, AXI_LLC_VERSION_LOW_REG_OFFSET);
-    uint32_t high = *reg32(&__base_llc, AXI_LLC_VERSION_HIGH_REG_OFFSET);
-    uint64_t version = ((uint64_t)high << 32) | ((uint64_t)low);
-    printf("llc ver = 0x%016X\n", version);
-    uart_write_flush(&__base_uart);
-
-    // Run basic register rw tests
-    LLC_RW_TEST_REG(AXI_LLC_CFG_FLUSH_PARTITION_LOW_REG_OFFSET, 0xcafedead);
-    LLC_RW_TEST_REG(AXI_LLC_CFG_FLUSH_PARTITION_HIGH_REG_OFFSET, 0xcafedead);
+    // uint32_t low = *reg32(&__base_llc, AXI_LLC_VERSION_LOW_REG_OFFSET);
+    // uint32_t high = *reg32(&__base_llc, AXI_LLC_VERSION_HIGH_REG_OFFSET);
+    // uint64_t version = ((uint64_t)high << 32) | ((uint64_t)low);
+    // printf("llc ver = 0x%016X\n", version);
+    // uart_write_flush(&__base_uart);
 
     // configure LLC
     LLC_RW_TEST_REG(AXI_LLC_CFG_SET_PARTITION_LOW_0_REG_OFFSET, 0x0000007f);
@@ -334,12 +333,29 @@ int main(void) {
     // set memory configuration to cache and not SPM (ADDED)
     LLC_RW_TEST_REG(AXI_LLC_CFG_SPM_LOW_REG_OFFSET, 0x00000000);
     LLC_RW_TEST_REG(AXI_LLC_CFG_SPM_HIGH_REG_OFFSET, 0x00000000);
-    LLC_W_TEST_REG(AXI_LLC_COMMIT_PARTITION_CFG_REG_OFFSET, 0x00000001);
+    LLC_W_TEST_REG(AXI_LLC_COMMIT_CFG_REG_OFFSET, 0x00000001);
+
+    __asm__ volatile ("fence ow, ir" ::: "memory");
+    /* Wait for the flush FSM to complete: flushed must read 0 before
+     * buffer accesses, otherwise bypass stays active and LLC is never used. */
+    while (*reg32(&__base_llc, AXI_LLC_FLUSHED_LOW_REG_OFFSET) != 0)
+        ;
+    printf("Configured LLC \n\r");
+    uart_write_flush(&__base_uart);
+
+    // start counting 
+    volatile uint32_t dummy;
+    asm volatile(
+        "li t0, 0x00003000\n"
+        "lw %0, 0(t0)\n"
+        : "=r"(dummy)
+        :
+        : "t0", "memory"
+    );
+    printf("SC: started\n\r");
+    uart_write_flush(&__base_uart);
 
     // start atg 
-    printf("Starting the atg \n\r");
-    uart_write_flush(&__base_uart);
-    volatile uint32_t dummy;
     asm volatile(
         "li t0, 0x00001000\n"
         "lw %0, 0(t0)\n"
@@ -347,25 +363,28 @@ int main(void) {
         :
         : "t0", "memory"
     );
+    printf("ATG: started\n\r");
+    uart_write_flush(&__base_uart);
 
-    /* memstresser like */
-    static volatile uint8_t buffer[8192];
+    /* memstresser like: buffer must be in DRAM region [0x80000000, 0x100000000)
+     * and larger than the LLC (8 ways x 256 sets x 8 blocks x 8B = 128KB) so
+     * that sequential accesses evict earlier lines and generate steady misses. */
+    #define LLC_SIZE_BYTES  (128 * 1024)
+    #define BUF_SIZE        (2 * LLC_SIZE_BYTES)
+    #define DRAM_BUF_ADDR   0x80200000UL // this address is valid even in the .spm version of the prorgram
+
+    volatile uint8_t *buffer = (volatile uint8_t *)DRAM_BUF_ADDR;
     volatile uint8_t sink = 0;
 
-    for (size_t i = 0; i < 8192; i++) {
-        buffer[i] = 0;
+    /* Cold init: compulsory misses fill then overflow the LLC */
+    for (size_t i = 0; i < BUF_SIZE; i++) {
+        buffer[i] = (uint8_t)i;
     }
 
-    for (size_t i = 0; i < 8192; i += 64) {
-        buffer[i]++;
+    /* Second pass: first half was evicted → sustained LLC misses */
+    for (size_t i = 0; i < BUF_SIZE; i++) {
+        sink ^= buffer[i];
     }
-
-    for (size_t i = 0; i < 8192; i += 64) {
-        sink ^= buffer[(i * 167) % 8192];
-    }
-
-    // LLC_RW_TEST_REG(AXI_LLC_CFG_SET_PARTITION_HIGH_0_REG_OFFSET, 0xdeadc0de);
-    // LLC_RW_TEST_REG(AXI_LLC_CFG_SET_PARTITION_HIGH_1_REG_OFFSET, 0xdeadc0de);
 
     return 0;
 }

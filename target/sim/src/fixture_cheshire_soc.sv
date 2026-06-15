@@ -149,8 +149,9 @@ module fixture_cheshire_soc #(
     .usb_dp_oe_o        ( ),
     .ext_start          (ext_start),
     .ext_stop           (ext_stop),
-    .start_address_i    (32'hC0000000),  // FIXED
-    .skip_cycles_i      ('0)   // FIXED
+    .start_address_i    (32'hC0000000),   // FIXED: C0000000 as start address
+    .skip_cycles_i      ('0),             // FIXED: 0 cycles between each burst
+    .mode_i             ('1)              // FIXED: read
   );
 
   ////////////////////////
