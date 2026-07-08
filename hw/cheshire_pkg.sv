@@ -162,6 +162,7 @@ package cheshire_pkg;
     bit     IrqRouter;
     bit     BusErr;
     bit     Atg;
+    bit     Atg2;
     // Parameters for Debug Module
     jtag_idcode_t DbgIdCode;
     dw_bt   DbgMaxReqs;
@@ -339,6 +340,7 @@ package cheshire_pkg;
     aw_bt vga;
     aw_bt usb;
     aw_bt atg;
+    aw_bt atg2;
     aw_bt ext_base;
     aw_bt num_in;
   } axi_in_t;
@@ -353,6 +355,7 @@ package cheshire_pkg;
     if (cfg.Vga)        begin i++; ret.vga   = i; end
     if (cfg.Usb)        begin i++; ret.usb   = i; end
     if (cfg.Atg)        begin i++; ret.atg   = i; end
+    if (cfg.Atg2)       begin i++; ret.atg2  = i; end
     i++;
     ret.ext_base = i;
     ret.num_in = i + cfg.AxiExtNumMst;
@@ -667,13 +670,14 @@ package cheshire_pkg;
     Gpio              : 1,
     Dma               : 1,
     SerialLink        : 1,
-    Vga               : 1,
-    Usb               : 0,  // disable to enable the axi_rt for the ATG in simulation
+    Vga               : 0,  // disabled: keeps num_in=6 so axi_rt reg_top (generated for 6 mgr) stays valid
+    Usb               : 0,  // disabled: same reason (Vga+Usb off keeps num_in=6 with Atg2 on)
     AxiRt             : 1,  // set to 1 for simulation
     Clic              : 0,
     IrqRouter         : 0,
     BusErr            : 1,
     Atg               : 1,
+    Atg2              : 1,
     // Debug
     DbgIdCode         : CheshireIdCode,
     DbgMaxReqs        : 4,

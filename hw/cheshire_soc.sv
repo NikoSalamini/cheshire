@@ -111,7 +111,11 @@ module cheshire_soc import cheshire_pkg::*; #(
   input ext_stop,
   input logic        mode_i,
   input logic [Cfg.AddrWidth-1:0] start_address_i,
-  input logic [7:0] skip_cycles_i
+  input logic [7:0] skip_cycles_i,
+  // ATG2 control signals
+  input logic        mode_i2,
+  input logic [Cfg.AddrWidth-1:0] start_address_i2,
+  input logic [7:0] skip_cycles_i2
 );
 
   `include "axi/typedef.svh"
@@ -540,7 +544,7 @@ module cheshire_soc import cheshire_pkg::*; #(
 
     (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_slv_req_t tagger_req;      // LLC DEBUG
     (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_slv_rsp_t tagger_rsp;      // LLC DEBUG
-    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_slv_req_t tagger_req_mod;  // HARD-CODING FOR ATG
+    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_slv_req_t tagger_req_mod;
 
     if (Cfg.LlcCachePartition) begin : gen_tagger
       tagger #(
@@ -569,19 +573,7 @@ module cheshire_soc import cheshire_pkg::*; #(
       assign axi_llc_remap_rsp = tagger_rsp;
     end
 
-    /* hard-coding the user channel to 1 for transactions starting with 0xC0 for atg marking */
-    /* NB: The MSB and LSB are by default 5,2. For example for 100, the user channel will be 1. */
-    always_comb begin
-      tagger_req_mod = tagger_req;
-
-      if (tagger_req.aw.addr[31:24] == 8'hC0) begin
-        tagger_req_mod.aw.user[2] = 1'b1;
-      end
-
-      if (tagger_req.ar.addr[31:24] == 8'hC0) begin
-        tagger_req_mod.ar.user[2] = 1'b1;
-      end 
-    end
+    assign tagger_req_mod = tagger_req;
 
     stall_checker #(
       .axi_req_t  ( axi_slv_req_t ),
@@ -1637,33 +1629,35 @@ module cheshire_soc import cheshire_pkg::*; #(
     assign intr.intn.bus_err.dma = '0;
   end
 
+  // Shared ATG start/stop: registered copy of the HW signal, with an
+  // additional software-triggerable path via MMIO reads to 0x00001000/0x00002000.
+  // Shared by both ATG and ATG2 so they start and stop simultaneously.
+  if (Cfg.Atg || Cfg.Atg2) begin : gen_atg_ctrl
+    (* dont_touch = "yes" *) (* mark_debug = "true" *) logic ext_start_mod;
+    (* dont_touch = "yes" *) (* mark_debug = "true" *) logic ext_stop_mod;
+
+    always_ff @(posedge clk_i) begin
+      ext_start_mod <= ext_start;
+      ext_stop_mod  <= ext_stop;
+      if (axi_rt_in_req[0].ar.addr == 32'h00001000)
+        ext_start_mod <= 1'b1;
+      if (axi_rt_in_req[0].ar.addr == 32'h00002000)
+        ext_stop_mod  <= 1'b1;
+    end
+  end
+
   ///////////
   //  ATG  //
   ///////////
   if (Cfg.Atg) begin : gen_atg
 
-    // TODO: atg (default user assignment). Is this used for tagging?
-    axi_mst_req_t axi_atg_req; 
-    (* dont_touch = "yes" *) (* mark_debug = "true" *) logic ext_start_mod;
-    (* dont_touch = "yes" *) (* mark_debug = "true" *) logic ext_stop_mod;
+    axi_mst_req_t axi_atg_req;
 
     always_comb begin
       axi_in_req[AxiIn.atg]         = axi_atg_req;
-      axi_in_req[AxiIn.atg].aw.user = Cfg.AxiUserDefault; 
+      axi_in_req[AxiIn.atg].aw.user = Cfg.AxiUserDefault;
       axi_in_req[AxiIn.atg].w.user  = Cfg.AxiUserDefault;
       axi_in_req[AxiIn.atg].ar.user = Cfg.AxiUserDefault;
-    end
-
-    always_ff @(posedge clk_i) begin
-      ext_start_mod  <= ext_start; // should be 0 if using addresses
-      ext_stop_mod   <= ext_stop;  // should be 0 if using addresses
-
-      // generate pulse on MMIO write
-      if (axi_rt_in_req[0].ar.addr == 32'h00001000) 
-        ext_start_mod <= 1'b1;
-
-      if (axi_rt_in_req[0].ar.addr == 32'h00002000)
-        ext_stop_mod <= 1'b1;
     end
 
     // ATG signals (no slave ports)
@@ -1689,8 +1683,8 @@ module cheshire_soc import cheshire_pkg::*; #(
       .rst_ni,
       .axi_mst_req_o  ( axi_atg_req_precut ),
       .axi_mst_rsp_i  ( axi_atg_rsp_precut ),
-      .ext_start (ext_start_mod),             // HW VIO
-      .ext_stop  (ext_stop_mod),              // HW VIO
+      .ext_start      ( gen_atg_ctrl.ext_start_mod ), 
+      .ext_stop       ( gen_atg_ctrl.ext_stop_mod ), 
       .mode_i,                                // HW VIO: 0=write, 1=read
       .start_address_i,                       // HW VIO
       .skip_cycles_i                          // HW VIO
@@ -1737,6 +1731,88 @@ module cheshire_soc import cheshire_pkg::*; #(
     );
 
     // TODO missing bus err
+
+  end
+
+  ////////////
+  //  ATG2  //
+  ////////////
+  if (Cfg.Atg2) begin : gen_atg2
+
+    axi_mst_req_t axi_atg2_req;
+    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_mst_req_t axi_atg2_req_precut;
+    (* dont_touch = "yes" *) (* mark_debug = "true" *) axi_mst_rsp_t axi_atg2_rsp_precut;
+
+    always_comb begin
+      axi_in_req[AxiIn.atg2]         = axi_atg2_req;
+      axi_in_req[AxiIn.atg2].aw.user = Cfg.AxiUserDefault;
+      axi_in_req[AxiIn.atg2].w.user  = Cfg.AxiUserDefault;
+      axi_in_req[AxiIn.atg2].ar.user = Cfg.AxiUserDefault;
+    end
+
+    cheshire_atg_wrap #(
+      .MaxReadTxns      (),
+      .MaxWriteTxns     (),
+      .NumLines         (Cfg.LlcNumLines),
+      .SetAssociativity (8),
+      .NumBlocks        (Cfg.LlcNumBlocks),
+      .NumBurstBeats    (32'd1),
+      .AddrWidth        ( Cfg.AddrWidth    ),
+      .DataWidth        ( Cfg.AxiDataWidth ),
+      .IdWidth          ( Cfg.AxiMstIdWidth),
+      .UserWidth        ( Cfg.AxiUserWidth ),
+      .axi_mst_req_t    ( axi_mst_req_t   ),
+      .axi_mst_rsp_t    ( axi_mst_rsp_t   )
+    ) i_atg2 (
+      .clk_i,
+      .rst_ni,
+      .axi_mst_req_o  ( axi_atg2_req_precut ),
+      .axi_mst_rsp_i  ( axi_atg2_rsp_precut ),
+      .ext_start      ( gen_atg_ctrl.ext_start_mod ),
+      .ext_stop       ( gen_atg_ctrl.ext_stop_mod  ),
+      .mode_i         ( mode_i2             ),
+      .start_address_i( start_address_i2    ),
+      .skip_cycles_i  ( skip_cycles_i2      )
+    );
+
+    axi_cut #(
+      .Bypass     ( ~Cfg.AtgPostCut   ),
+      .aw_chan_t  ( axi_mst_aw_chan_t ),
+      .w_chan_t   ( axi_mst_w_chan_t  ),
+      .b_chan_t   ( axi_mst_b_chan_t  ),
+      .ar_chan_t  ( axi_mst_ar_chan_t ),
+      .r_chan_t   ( axi_mst_r_chan_t  ),
+      .axi_req_t  ( axi_mst_req_t    ),
+      .axi_resp_t ( axi_mst_rsp_t    )
+    ) i_atg2_axi_cut (
+      .clk_i,
+      .rst_ni,
+      .slv_req_i  ( axi_atg2_req_precut     ),
+      .slv_resp_o ( axi_atg2_rsp_precut     ),
+      .mst_req_o  ( axi_atg2_req            ),
+      .mst_resp_i ( axi_in_rsp[AxiIn.atg2] )
+    );
+
+    // SC: latency from ATG2 to the xbar slave port
+    stall_checker #(
+      .axi_req_t  ( axi_mst_req_t ),
+      .axi_resp_t ( axi_mst_rsp_t )
+    ) i_atg2_sc (
+      .clk_i,
+      .rst_ni,
+      .ext_start_i   ( sc_ext_start            ),
+      .ext_stop_i    ( sc_ext_stop             ),
+      .axi_req_i     ( axi_atg2_req            ),
+      .axi_resp_i    ( axi_in_rsp[AxiIn.atg2]  ),
+      .ar_max_lat_o  ( /* not connected */     ),
+      .ar_avg_sum_o  ( /* not connected */     ),
+      .ar_avg_cnt_o  ( /* not connected */     ),
+      .ar_overflow_o ( /* not connected */     ),
+      .aw_max_lat_o  ( /* not connected */     ),
+      .aw_avg_sum_o  ( /* not connected */     ),
+      .aw_avg_cnt_o  ( /* not connected */     ),
+      .aw_overflow_o ( /* not connected */     )
+    );
 
   end
 

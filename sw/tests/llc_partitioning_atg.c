@@ -2,8 +2,7 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
-// Robert Balas <balasr@iis.ee.ethz.ch>
-// Enrico Zelioli <ezelioli@iis.ee.ethz.ch>
+// Niko Salamini <nikosalamini@santannapisa.it>
 
 // Basic testing of the cache partitioning's configuration registers
 
@@ -26,7 +25,7 @@ static int probe_w(void *base, int offs, uint32_t val);
 static int probe_rw(void *base, int offs, uint32_t val) {
     *(volatile uint32_t *)((uint8_t *)base + offs) = val;
     uint32_t ret = *reg32(base, offs);
-    printf("Writing at offset %d\n", offs);
+    printf("Writing at offset %d\r\n", offs);
     uart_write_flush(&__base_uart);
     return !(ret == val);
 }
@@ -49,7 +48,7 @@ static int probe_w(void *base, int offs, uint32_t val) {
     );
 
     // Print write address
-    printf("Writing at offset %d\n", offs);
+    printf("Writing at offset %d\r\n", offs);
     uart_write_flush(&__base_uart);
     return 0;
 }
@@ -245,6 +244,37 @@ int main(void) {
     uint64_t reset_freq = clint_get_core_freq(rtc_freq, 2500);
     uart_init(&__base_uart, reset_freq, 115200);
 
+    // configure tagger partitions
+    // TO FIX: ATG HAVE THE SAME ADDRESS FOR NOW!
+    configure_tagger_addr(0, 1, 0xC0000000); // cva6 0x0-0xBffffff
+    configure_tagger_addr(1, 1, 0xD0000000); // 0xC0000000-0xD0000000 (ATG1)
+    configure_tagger_addr(2, 1, 0xE0000000); // 0xD0000000-           (ATG2)
+
+    // configure tagger patid
+    configure_tagger_patid(0, 1); // cva6 core (tagged as the first atg)
+    configure_tagger_patid(1, 1); // atg1
+    configure_tagger_patid(2, 2); // atg2
+
+    // configure LLC
+    LLC_RW_TEST_REG(AXI_LLC_CFG_SET_PARTITION_LOW_0_REG_OFFSET, 0x00808000); // 128 sets per ATG
+    LLC_RW_TEST_REG(AXI_LLC_CFG_SET_PARTITION_LOW_1_REG_OFFSET, 0x00000000);
+    LLC_W_TEST_REG(AXI_LLC_COMMIT_PARTITION_CFG_REG_OFFSET, 0x00000001);
+    printf("Configuring LLC partitions \n\r");
+    uart_write_flush(&__base_uart); 
+
+    // set memory configuration to cache and not SPM
+    LLC_RW_TEST_REG(AXI_LLC_CFG_SPM_LOW_REG_OFFSET, 0x00000000);
+    LLC_RW_TEST_REG(AXI_LLC_CFG_SPM_HIGH_REG_OFFSET, 0x00000000);
+    LLC_W_TEST_REG(AXI_LLC_COMMIT_CFG_REG_OFFSET, 0x00000001);
+
+    __asm__ volatile ("fence ow, ir" ::: "memory");
+    /* Wait for the flush FSM to complete: flushed must read 0 before
+     * buffer accesses, otherwise bypass stays active and LLC is never used. */
+    while (*reg32(&__base_llc, AXI_LLC_FLUSHED_LOW_REG_OFFSET) != 0)
+        ;
+    printf("Configured LLC \n\r");
+    uart_write_flush(&__base_uart);
+
     // Enable and configure AXI REALM
     printf("AXI_RT configuration starts \n\r");
     __axirt_claim(1, 1);
@@ -252,21 +282,41 @@ int main(void) {
     printf("Claimed access to the axi_realm \n\r");
     uart_write_flush(&__base_uart);
 
-    // Configure AXI-RT CVA6 core 0
-    __axirt_set_region(0, 0xffffffff, 0, 0);
-    __axirt_set_region(0x100000000, 0xffffffffffffffff, 1, 0);
-    __axirt_set_budget(8, 0, 0);
-    __axirt_set_budget(8, 1, 0);
-    __axirt_set_period(100, 0, 0);
-    __axirt_set_period(100, 1, 0);
-    printf("Configured cva6 core \n\r");
-    uart_write_flush(&__base_uart);
-
-    // Configure AXI-RT 
+    // Configure AXI-RT
+    // With Vga=0: core=0,dbg=1,dma=2,slink=3,atg=4,atg2=5  -> atg_id = NUM_INT_HARTS+3
     int chs_dma_id = *reg32(&__base_regs, CHESHIRE_NUM_INT_HARTS_REG_OFFSET) + 1;
     int chs_atg_id = *reg32(&__base_regs, CHESHIRE_NUM_INT_HARTS_REG_OFFSET) + 3;
     printf("ID dma: %d, ID ATG: %d\n\r", chs_dma_id, chs_atg_id);
 
+    /* -------- ATG1 -------- */
+    // region
+    uart_write_flush(&__base_uart);
+    __axirt_set_region(0, 0xffffffff, 0, chs_atg_id);
+    printf("Configured region 0 for atg \n\r");
+    uart_write_flush(&__base_uart);
+    __axirt_set_region(0x100000000, 0xffffffffffffffff, 1, chs_atg_id);
+    printf("Configured region 1 for atg \n\r");
+    uart_write_flush(&__base_uart);
+
+    // budget
+    __axirt_set_budget(8, 0, chs_atg_id);
+    printf("Configured budget 0 for atg \n\r");
+    __axirt_set_budget(8, 1, chs_atg_id);
+    printf("Configured budget 1 for atg \n\r");
+    uart_write_flush(&__base_uart);
+
+    // period
+    __axirt_set_period(100, 0, chs_atg_id);
+    printf("Configured period 0 for atg \n\r");
+    uart_write_flush(&__base_uart);
+    __axirt_set_period(100, 1, chs_atg_id);
+    printf("Configured period 1 for atg \n\r");
+    uart_write_flush(&__base_uart);
+
+    /* -------- ATG2 -------- */
+    // new chs ID for the next ATG
+    chs_atg_id += 1; 
+    
     // region
     uart_write_flush(&__base_uart);
     __axirt_set_region(0, 0xffffffff, 0, chs_atg_id);
@@ -292,43 +342,15 @@ int main(void) {
     uart_write_flush(&__base_uart);
 
     // print
-    printf("Configured atg \n\r");
+    printf("Configured ATGs \n\r");
     uart_write_flush(&__base_uart);
 
-    // Enable RT unit for ATG (bit 5) and CVA6 core 0 (bit 0)
-    // Vga=0: ATG is at index 4 (was 5 with Vga=1). Mask = bit0 (core) | bit4 (ATG).
-    // Both SIM and real hw use the same mask now.
-    __axirt_enable(0x11);
-    printf("enabled axi_rt \n\r");
+    // Enable RT unit for core+ATG1+ATG2  (bit4 | bit5 = 0x31, Vga=0)
+    printf("Enabling axi_rt \n\r");
     uart_write_flush(&__base_uart);
+    __axirt_enable(0x30); // disabled for CVA6
 
-    // configure LLC
-    LLC_RW_TEST_REG(AXI_LLC_CFG_SET_PARTITION_LOW_0_REG_OFFSET, 0x0000007f);
-    LLC_RW_TEST_REG(AXI_LLC_CFG_SET_PARTITION_LOW_1_REG_OFFSET, 0x00000000);
-    LLC_W_TEST_REG(AXI_LLC_COMMIT_PARTITION_CFG_REG_OFFSET, 0x00000001); 
-
-    // configure tagger patid
-    configure_tagger_patid(0, 0); // cva6 core
-    configure_tagger_patid(1, 4); // atg
-
-    // configure tagger partitions
-    configure_tagger_addr(0, 1, 0xC0000000); // cva6 0x0-0xBffffff
-    configure_tagger_addr(1, 1, 0xD0000000); // 0xC0000000-
-
-    // set memory configuration to cache and not SPM (ADDED)
-    LLC_RW_TEST_REG(AXI_LLC_CFG_SPM_LOW_REG_OFFSET, 0x00000000);
-    LLC_RW_TEST_REG(AXI_LLC_CFG_SPM_HIGH_REG_OFFSET, 0x00000000);
-    LLC_W_TEST_REG(AXI_LLC_COMMIT_CFG_REG_OFFSET, 0x00000001);
-
-    __asm__ volatile ("fence ow, ir" ::: "memory");
-    /* Wait for the flush FSM to complete: flushed must read 0 before
-     * buffer accesses, otherwise bypass stays active and LLC is never used. */
-    while (*reg32(&__base_llc, AXI_LLC_FLUSHED_LOW_REG_OFFSET) != 0)
-        ;
-    printf("Configured LLC \n\r");
-    uart_write_flush(&__base_uart);
-
-    // start counting 
+    // // start counting 
     volatile uint32_t dummy;
     asm volatile(
         "li t0, 0x00003000\n"
@@ -340,7 +362,7 @@ int main(void) {
     printf("SC: started\n\r");
     uart_write_flush(&__base_uart);
 
-    // start atg 
+    // start ATGs
     asm volatile(
         "li t0, 0x00001000\n"
         "lw %0, 0(t0)\n"
@@ -348,28 +370,8 @@ int main(void) {
         :
         : "t0", "memory"
     );
-    printf("ATG: started\n\r");
+    printf("ATGs: started\n\r");
     uart_write_flush(&__base_uart);
-
-    /* memstresser like: buffer must be in DRAM region [0x80000000, 0x100000000)
-     * and larger than the LLC (8 ways x 256 sets x 8 blocks x 8B = 128KB) so
-     * that sequential accesses evict earlier lines and generate steady misses. */
-    #define LLC_SIZE_BYTES  (128 * 1)
-    #define BUF_SIZE        (2 * LLC_SIZE_BYTES)
-    #define DRAM_BUF_ADDR   0x80200000UL // this address is valid even in the .spm version of the prorgram
-
-    volatile uint8_t *buffer = (volatile uint8_t *)DRAM_BUF_ADDR;
-    volatile uint8_t sink = 0;
-
-    /* Cold init: compulsory misses fill then overflow the LLC */
-    for (size_t i = 0; i < BUF_SIZE; i++) {
-        buffer[i] = (uint8_t)i;
-    }
-
-    /* Second pass: first half was evicted → sustained LLC misses */
-    for (size_t i = 0; i < BUF_SIZE; i++) {
-        sink ^= buffer[i];
-    }
 
     return 0;
 }

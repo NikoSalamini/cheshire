@@ -230,6 +230,7 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
   logic         ext_stop,   vio_ext_stop;
   logic [31:0]  start_address_i, vio_start_address_i; // the address of the platform is 32 bits (TODO: hard-coded)
   logic [7:0]   skip_cycles_i, vio_skip_cycles_i;     // skip cycles for the ATG
+  logic mode_i, vio_mode_i;                           // mode of the ATG (read or write)
 
 `ifdef USE_VIO
   vio i_vio (
@@ -240,7 +241,8 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
     .probe_out3 ( vio_ext_start     ),
     .probe_out4 ( vio_ext_stop      ),
     .probe_out5 ( vio_start_address_i),
-    .probe_out6 ( vio_skip_cycles_i )
+    .probe_out6 ( vio_skip_cycles_i ),
+    .probe_out7 ( vio_mode_i        )
   );
 `else
   assign vio_reset            = '0;
@@ -250,6 +252,7 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
   assign vio_ext_stop         = '0;
   assign vio_start_address_i  = '0;
   assign vio_skip_cycles_i    = '0;
+  assign vio_mode_i           = '0;
 `endif
 
 `ifdef USE_RESET
@@ -262,6 +265,7 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
   assign ext_stop         = vio_ext_stop;
   assign start_address_i  = vio_start_address_i;
   assign skip_cycles_i    = vio_skip_cycles_i;
+  assign mode_i           = vio_mode_i;
 
   //////////////////
   //  Reset Sync  //
@@ -673,8 +677,9 @@ module cheshire_top_xilinx import cheshire_pkg::*; #(
     .axi_ext_mst_rsp_o  ( ),
     .axi_ext_slv_req_o  ( ),
     .axi_ext_slv_rsp_i  ( '0 ),
-    .ext_start          ( ext_start ),  // atg
+    .ext_start          ( ext_start ),  
     .ext_stop           ( ext_stop  ),
+    .mode_i             ( mode_i    ),
     .start_address_i    ( start_address_i ),
     .skip_cycles_i      ( skip_cycles_i ),
 `ifdef USE_CFG_REGS
